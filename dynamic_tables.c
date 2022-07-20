@@ -9,6 +9,8 @@
 */
 
 #include "dynamic_tables.h"
+#include "pre_assembler.h"
+#include "utilities.h"
 
 /* Add new macro item to the macros linked list */
 void add_new_macro(item_ptr *head_item, char* name){
@@ -18,7 +20,7 @@ void add_new_macro(item_ptr *head_item, char* name){
 	new_macro = (item_ptr)malloc(sizeof(item_ptr));
 	if(!new_macro){
 		fprintf(stderr,"Memory Allocation failed");
-		exit(1);
+		exit(0);
 	}
 	/* Copy the name of the macro */
 	strcpy(new_macro->name, name);
@@ -52,3 +54,24 @@ void add_macro_line(item_ptr *macro, char* macro_line){
 	}
 	runner->next = new_line_item;
 }
+
+/* Checks if a name (string) exists in the table */
+int does_macro_exist(item_ptr *macro_head, char* name){
+	item_ptr runner = macro_head;
+	while(runner->next != NULL){
+		if(strcmp(runner->name, name){
+			return TRUE;
+		} 
+		runner = runner->next;
+	}
+	return FALSE;
+}
+
+
+
+
+
+
+
+
+
