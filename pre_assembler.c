@@ -19,10 +19,23 @@ FILE* pre_assemble(FILE* fp_as, char* filename){
 	char* appended_file_name;
 	appended_file_name = append_filename(filename, AM);
 	fp_am = fopen(appended_file_name, "w"); /* Creates a new file */
-	/*
-		-define Macros dynamic table.
-		-run pre assembler algorithm (function) that returns .am file.
-		-return the .am file.
-	*/
+	
+	/* define Macros dynamic table. */
+	
+	/* run pre assembler algorithm that produces .am file: */
+	shledi_pre_assemble(fp_as, fp_am, macros_table_head);	
+		
+	/* return the .am file. */
 	return fp_am;
 }
+
+void shledi_pre_assemble(FILE* fp_as, FILE* fp_am, item_ptr){
+	char* line[MAX_LINE_LENGTH];
+	while((fgets(line, 80, fp_as)) != NULL){
+		/* analyze line */
+	}
+}
+
+
+
+
