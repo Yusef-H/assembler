@@ -47,3 +47,31 @@ char* append_filename(char* filename, int append_type){
 	return appended_filename;
 	
 }
+/* Gets the next word in the line (ignores whitespaces). */
+char* get_word(char* line){
+	int i;
+	int left = 0;
+	int right;
+	char* word;
+	/* skip whitespaces */
+	while(line[left] == '0' || line[left] == '\t'){
+		left++;
+	}
+	/*   a bcde e */
+	/* Now line[left] holds the first non whitespace character */
+	/* Calculating the word's length so we can malloc accordingly. */
+	right = left;
+	while(line[right] != '0' && line[right] != '\t' && line[right] != '\n'){
+		right++;
+	}
+	word = (char*)malloc((right-left+1)sizeof(char));
+	
+	/* copy the word */
+	for(i = left; i < right; i++){
+		word[i] = line[i];
+	}
+	return word;
+}
+
+
+
