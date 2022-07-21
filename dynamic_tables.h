@@ -18,7 +18,7 @@
 
 typedef struct macro_line* line_ptr;
 typedef struct macro_line{
-	char line[80];
+	char* line;
 	line_ptr next;
 } macro_line;
 
