@@ -1,6 +1,8 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include "utilities.h"
 #include "assembler.h"
 
 /* remove them to header files later */
@@ -47,30 +49,27 @@ char* append_filename(char* filename, int append_type){
 	return appended_filename;
 	
 }
-/* Gets the next word in the line (ignores whitespaces). */
-char* get_word(char* line){
-	int i;
-	int left = 0;
-	int right;
-	char* word;
+/* Gets line as an input and a pointer to the starting character that
+   we need to read from.
+   returns the next word in the line starting from start_char.  */
+char* get_word(char* line, char* word){
+	int i = 0;
 	/* skip whitespaces */
-	while(line[left] == '0' || line[left] == '\t'){
-		left++;
+	while( *line == '0' || *line == '\t'){
+		line++;
 	}
-	/*   a bcde e */
-	/* Now line[left] holds the first non whitespace character */
-	/* Calculating the word's length so we can malloc accordingly. */
-	right = left;
-	while(line[right] != '0' && line[right] != '\t' && line[right] != '\n'){
-		right++;
+	if(*line == ','){
+		strcpy(word, ",");
+		return ++line;
 	}
-	word = (char*)malloc((right-left+1)sizeof(char));
 	
 	/* copy the word */
-	for(i = left; i < right; i++){
-		word[i] = line[i];
+	
+	while(*line != ' ' && *line != '\t' && *line != '\n' && *line != '\0'){
+		word[i++] = *line;
+		line++;
 	}
-	return word;
+	return line;
 }
 
 

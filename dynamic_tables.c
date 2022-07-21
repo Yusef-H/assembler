@@ -13,7 +13,7 @@
 #include "utilities.h"
 
 /* Add new macro item to the macros linked list */
-void add_new_macro(item_ptr *head_item, char* name){
+item_ptr add_new_macro(item_ptr *head_item, char* name){
 	item_ptr new_macro;
 	item_ptr runner;
 	line_ptr lines_head = NULL;
@@ -36,6 +36,7 @@ void add_new_macro(item_ptr *head_item, char* name){
 		runner = runner->next;
 	}
 	runner->next = new_macro;	
+	return new_macro;
 }
 
 /* Add a line to the macro item lines linked list. */
@@ -56,16 +57,20 @@ void add_macro_line(item_ptr *macro, char* macro_line){
 }
 
 /* Checks if a name (string) exists in the table */
-int does_macro_exist(item_ptr *macro_head, char* name){
-	item_ptr runner = macro_head;
+item_ptr does_macro_exist(item_ptr *macro_head, char* name){
+	item_ptr runner = *macro_head;
 	while(runner->next != NULL){
-		if(strcmp(runner->name, name){
-			return TRUE;
+	printf("%s",runner->name);
+		if(strcmp(runner->name, name)){
+			printf("%s",runner->name);
+			return runner;
 		} 
 		runner = runner->next;
 	}
-	return FALSE;
+	return NULL;
 }
+
+
 
 
 

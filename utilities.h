@@ -6,4 +6,4 @@ void throw_error(int line_number);
 char* append_filename(char* filename, int append_type);
 
 /* gets the next word in line */
-char* get_word(char*);
+char* get_word(char*, char*);

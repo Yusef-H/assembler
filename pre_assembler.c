@@ -11,6 +11,7 @@
 #include "pre_assembler.h"
 #include "utilities.h"
 #include "assembler.h"
+#include "dynamic_tables.h"
 
 
 
@@ -23,32 +24,56 @@ FILE* pre_assemble(FILE* fp_as, char* filename){
 	/* define Macros dynamic table. */
 	
 	/* run pre assembler algorithm that produces .am file: */
-	shledi_pre_assemble(fp_as, fp_am, macros_table_head);	
+	shledi_pre_assemble(fp_as, &fp_am);	
 		
 	/* close and return return the .am file. */
 	fclose(fp_am);
 	return fp_am;
 }
 
-void shledi_pre_assemble(FILE* fp_as, FILE* fp_am, item_ptr){
-	char line[MAX_LINE_LENGTH];
-	char *word;
+void shledi_pre_assemble(FILE* fp_as, FILE** fp_am){
+	
+	char* line = (char*)malloc(sizeof(char)*MAX_LENGTH);
+	char word[MAX_LENGTH];
 	int macro_flag = OFF;
-	while(fgets(line, MAX_LINE_LENGTH, fp_as)){
-		word = get_word(line);
+	
+	/* Can be changed so we cant see implementation of list!!!!!!!! */
+	item_ptr macro_list;
+	item_ptr current_macro;
+	item_ptr macro;
+	while(fgets(line, MAX_LENGTH, fp_as)){
+		line_ptr temp;
+		int k = 0;
+		line = get_word(line, word); 
 		
-		/* add if word exists in macro's table, write it's lines */
+		if(k++ == 1)
+			printf("%s",line);
+		
+		if((macro = does_macro_exist(&macro_list, word)) ){
+			if(macro->lines == NULL){
+				break;
+			}
+			temp = macro->lines;
+			while(temp != NULL){
+				fputs((temp)->line, (*fp_am));
+				temp = (temp)->next;
+			}
+		}
 		
 		
-		if(strcmp(word, "macro") == 0){
+		else if(strcmp(word, "macro") == 0){
 			macro_flag = ON; 
-			/* Add macro name to the macro table */
+			line = get_word(line, word);
+			current_macro = add_new_macro(&macro_list, word);
 		}
-		if(macro_flag == ON){
-			/* Add line to the macro's lines linked list. */
-		}
-		if(strcmp(word, "endmacro")){
+		else if(strcmp(word, "endmacro")){
 			macro_flag = OFF;
+		}
+		else if(macro_flag == ON){
+			add_macro_line(&current_macro, line);
+		}
+		else{
+			fputs(line, (*fp_am));
 		}
 	}
 }

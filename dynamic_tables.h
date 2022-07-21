@@ -29,10 +29,10 @@ typedef struct macro_item{
 	item_ptr next;
 } macro_item;
 
-void add_new_macro(item_ptr *head_item, char* name);
+item_ptr add_new_macro(item_ptr *head_item, char* name);
 void add_macro_line(item_ptr *macro, char* macro_line);
-int does_macro_exist(item_ptr *macro_head, char* name);
-
+item_ptr does_macro_exist(item_ptr *macro_head, char* name);
+void write_macro_lines_to_file(item_ptr*, FILE**);
 
 
 
