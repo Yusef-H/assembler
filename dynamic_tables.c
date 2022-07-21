@@ -8,6 +8,7 @@
  	2- Macros table that is used during preprocessing.
 */
 
+#include "assembler.h"
 #include "dynamic_tables.h"
 #include "pre_assembler.h"
 #include "utilities.h"
@@ -36,33 +37,39 @@ item_ptr add_new_macro(item_ptr *head_item, char* name){
 		second = second->next;
 	}
 /*	 empty */
-	if(first == *head_item){
+	if(second == *head_item){
 		*head_item = new_macro;
-		new_macro->next = first;
+		new_macro->next = NULL;
 	}	
-	/*else{
+	else{
 		first->next = new_macro;
 		new_macro->next = NULL;
-	}*/
+	}
 	return new_macro;
 }
 
 /* Add a line to the macro item lines linked list. */
-
 void add_macro_line(item_ptr *macro, char* macro_line){
+	/* Allocate space for the new line item */
 	line_ptr new_line_item = (line_ptr)malloc(sizeof(line_ptr)); 
-	line_ptr first,second;
+	line_ptr first,second; /* Pointers used to insert new item. */
+	/* Allocate space for the item's line field. */
+	new_line_item->line = (char*)malloc(sizeof(char)*MAX_LENGTH);
 	if(!new_line_item){
 		fprintf(stderr,"Memory Allocation failed");
 		exit(1);
 	}
-	strcpy(new_line_item->line, macro_line);
-	second = (*macro)->lines;
 	
+	/* Copy the macro lines inside the new line item field. */
+	strcpy((new_line_item->line), macro_line);
+
+	/* Add the new line item to the macro's lines linked list.  */
+	second = (*macro)->lines;
 	while(second != NULL){
 		first = second;
 		second = second->next;
 	}
+	/* If empty: */
 	if(second == (*macro)->lines){
 		(*macro)->lines = new_line_item;
 		((*macro)->lines)->next = NULL;
@@ -76,7 +83,9 @@ void add_macro_line(item_ptr *macro, char* macro_line){
 
 /* Checks if a name (string) exists in the table */
 item_ptr does_macro_exist(item_ptr macro_head, char* name){
-	if(macro_head != NULL){
+	while(macro_head != NULL){
+/*		printf("Macro item name: %s",macro_head->name);*/
+		
 		if(!strcmp(macro_head->name, name)){
 			return macro_head;
 		}
@@ -85,9 +94,19 @@ item_ptr does_macro_exist(item_ptr macro_head, char* name){
 	return NULL;
 }
 
+/* Prints the macros linked list and for each macro prints 
+   the macro's lines linked list that the macro holds. */
 void print_macro_list(item_ptr macro_head){
 	while(macro_head){
-		printf("%s->", macro_head->name);
+		printf("\n%s->", macro_head->name);
+		/* Printing Macro Lines: */
+		printf("(\n");
+		while(macro_head->lines){
+			printf("%s", (macro_head->lines)->line);
+			macro_head->lines = (macro_head->lines)->next; 
+		}
+		printf("\n)\n");
+		/* Done lines list move to next macro. */
 		macro_head = macro_head->next;
 	}
 }

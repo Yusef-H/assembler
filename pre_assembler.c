@@ -46,7 +46,7 @@ void shledi_pre_assemble(FILE* fp_as, FILE** fp_am){
 		line_ptr temp;
 		word = (char*)malloc(sizeof(char)*MAX_LENGTH);
 		next_start = get_word(line, word); 
-		/*printf("%s\n",word);*/
+		
 		if((macro = does_macro_exist(macro_list, word)) ){
 			temp = macro->lines;
 			while(temp != NULL){
@@ -57,11 +57,12 @@ void shledi_pre_assemble(FILE* fp_as, FILE** fp_am){
 		
 		
 		else if(!strcmp(word, "macro")){
-			printf("Heeeeeeeeee");
 			macro_flag = ON; 
 			free(word);
 			word = (char*)malloc(sizeof(char)*MAX_LENGTH);
+
 			next_start = get_word(next_start, word);
+			
 			current_macro = add_new_macro(&macro_list, word);
 		}
 		else if(!strcmp(word, "endmacro")){
@@ -75,7 +76,10 @@ void shledi_pre_assemble(FILE* fp_as, FILE** fp_am){
 		}
 		free(word);
 	}
+	
+	
 	print_macro_list(macro_list);
+	
 }
 
 
