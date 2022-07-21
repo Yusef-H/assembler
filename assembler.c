@@ -53,7 +53,7 @@ int main(int argc, char *argv[]){
 	
 	for(i = 1; i<argc; i++){
 		appended_filename = append_filename(argv[i], AS); 
-		printf("%s",appended_filename);
+		/*printf("%s",appended_filename);*/
 		fp_as = fopen(appended_filename, "r");
 		if(!fp_as){
 			error_type = OPEN_FILE;

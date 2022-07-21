@@ -53,9 +53,10 @@ char* append_filename(char* filename, int append_type){
    we need to read from.
    returns the next word in the line starting from start_char.  */
 char* get_word(char* line, char* word){
+	
 	int i = 0;
 	/* skip whitespaces */
-	while( *line == '0' || *line == '\t'){
+	while( *line == ' ' || *line == '\t'){
 		line++;
 	}
 	if(*line == ','){
@@ -69,7 +70,12 @@ char* get_word(char* line, char* word){
 		word[i++] = *line;
 		line++;
 	}
+	word[i] = '\0';
 	return line;
+}
+
+void empty_word(char* word){
+	
 }
 
 

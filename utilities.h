@@ -7,3 +7,5 @@ char* append_filename(char* filename, int append_type);
 
 /* gets the next word in line */
 char* get_word(char*, char*);
+
+void empty_word(char*);

@@ -34,25 +34,20 @@ FILE* pre_assemble(FILE* fp_as, char* filename){
 void shledi_pre_assemble(FILE* fp_as, FILE** fp_am){
 	
 	char* line = (char*)malloc(sizeof(char)*MAX_LENGTH);
-	char word[MAX_LENGTH];
+	char* next_start = line;
+	char* word;
 	int macro_flag = OFF;
 	
 	/* Can be changed so we cant see implementation of list!!!!!!!! */
-	item_ptr macro_list;
+	item_ptr macro_list = NULL;
 	item_ptr current_macro;
 	item_ptr macro;
 	while(fgets(line, MAX_LENGTH, fp_as)){
 		line_ptr temp;
-		int k = 0;
-		line = get_word(line, word); 
-		
-		if(k++ == 1)
-			printf("%s",line);
-		
-		if((macro = does_macro_exist(&macro_list, word)) ){
-			if(macro->lines == NULL){
-				break;
-			}
+		word = (char*)malloc(sizeof(char)*MAX_LENGTH);
+		next_start = get_word(line, word); 
+		/*printf("%s\n",word);*/
+		if((macro = does_macro_exist(macro_list, word)) ){
 			temp = macro->lines;
 			while(temp != NULL){
 				fputs((temp)->line, (*fp_am));
@@ -61,12 +56,15 @@ void shledi_pre_assemble(FILE* fp_as, FILE** fp_am){
 		}
 		
 		
-		else if(strcmp(word, "macro") == 0){
+		else if(!strcmp(word, "macro")){
+			printf("Heeeeeeeeee");
 			macro_flag = ON; 
-			line = get_word(line, word);
+			free(word);
+			word = (char*)malloc(sizeof(char)*MAX_LENGTH);
+			next_start = get_word(next_start, word);
 			current_macro = add_new_macro(&macro_list, word);
 		}
-		else if(strcmp(word, "endmacro")){
+		else if(!strcmp(word, "endmacro")){
 			macro_flag = OFF;
 		}
 		else if(macro_flag == ON){
@@ -75,7 +73,9 @@ void shledi_pre_assemble(FILE* fp_as, FILE** fp_am){
 		else{
 			fputs(line, (*fp_am));
 		}
+		free(word);
 	}
+	print_macro_list(macro_list);
 }
 
 
