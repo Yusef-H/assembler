@@ -16,19 +16,26 @@
 
 
 FILE* pre_assemble(FILE* fp_as, char* filename){
-	FILE* fp_am;
-	char* appended_file_name;
-	appended_file_name = append_filename(filename, AM);
-	fp_am = fopen(appended_file_name, "w"); /* Creates a new file */
+	char* appended_filename;
 	
-	/* define Macros dynamic table. */
-	
-	/* run pre assembler algorithm that produces .am file: */
-	pre_assemble_algorithm(fp_as, &fp_am);	
+	/* There's atleast one macro so we must create .am file */
+	if(check_for_macros(&fp_as)){
+		FILE* fp_am;
+		/* Create the .am file and open it */
+		appended_filename = append_filename(filename, AM);
+		fp_am = fopen(appended_filename, "w");
 		
-	/* close and return return the .am file. */
-	fclose(fp_am);
-	return fp_am;
+		/* Run pre assembler algorithm */
+		pre_assemble_algorithm(fp_as, &fp_am);
+		
+		/* Done pre assembling, close the file and return it. */
+		fclose(fp_am);
+		printf("\nPre assembling file *%s* done!\n",appended_filename);
+		return fp_am;
+	}
+	
+	/* There's no macros in the .as file so we proceed with .as file. */
+	return fp_as;
 }
 
 
@@ -48,7 +55,6 @@ void pre_assemble_algorithm(FILE* fp_as, FILE** fp_am){
 	item_ptr macro;
 	
 	while(fgets(line, MAX_LENGTH, fp_as)){
-		line_ptr temp;
 		word = (char*)malloc(sizeof(char)*MAX_LENGTH);
 		next_start = get_word(line, word); 
 		
@@ -89,6 +95,19 @@ void pre_assemble_algorithm(FILE* fp_as, FILE** fp_am){
 	
 	print_macro_table(macro_table);
 	
+}
+
+int check_for_macros(FILE** fp_as){
+	char* line = (char*)malloc(sizeof(char)*MAX_LENGTH);
+	while(fgets(line, MAX_LENGTH, *fp_as)){
+		char* word = (char*)malloc(sizeof(char)*MAX_LENGTH);
+		get_word(line, word);
+		if(!strcmp(word, "endmacro")){
+			return TRUE;
+		}
+		free(word);
+	}
+	return FALSE;
 }
 
 

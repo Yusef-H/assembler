@@ -1,0 +1,11 @@
+		jsr S.2
+		cmp #-6,r1
+		not K
+		red W
+		m1
+K: 		.data -5
+		m1
+S: 		.struct 2,"ab"
+		cmp #-6,r1
+		not K
+		

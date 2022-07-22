@@ -66,8 +66,6 @@ int main(int argc, char *argv[]){
 		fp_am = pre_assemble(fp_as, argv[i]); /*Creates .am file after
 											    handling macros*/
 		
-		printf("\nPre assembling file *%s* done!\n",appended_filename);
-		
 		fclose(fp_as);  /* Done with the input file. */
 		
 		/* First pass on fp_am */
