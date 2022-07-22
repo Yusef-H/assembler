@@ -53,18 +53,24 @@ int main(int argc, char *argv[]){
 	
 	for(i = 1; i<argc; i++){
 		appended_filename = append_filename(argv[i], AS); 
-		/*printf("%s",appended_filename);*/
+		
 		fp_as = fopen(appended_filename, "r");
 		if(!fp_as){
 			error_type = OPEN_FILE;
 			throw_error(0);
 		}
 		
+		
 		fp_am = pre_assemble(fp_as, argv[i]); /*Creates .am file after
 											    handling macros*/
 		
-		/*fclose(fp_as);*/  /* Done with the input file. */
+		printf("\nPre assembling file *%s* done!\n",appended_filename);
 		
+		fclose(fp_as);  /* Done with the input file. */
+		
+		/* First pass on fp_am */
+		
+		/* Second pass on fp_am */
 		
 		
 	

@@ -24,14 +24,14 @@ FILE* pre_assemble(FILE* fp_as, char* filename){
 	/* define Macros dynamic table. */
 	
 	/* run pre assembler algorithm that produces .am file: */
-	shledi_pre_assemble(fp_as, &fp_am);	
+	pre_assemble_algorithm(fp_as, &fp_am);	
 		
 	/* close and return return the .am file. */
 	fclose(fp_am);
 	return fp_am;
 }
 
-void shledi_pre_assemble(FILE* fp_as, FILE** fp_am){
+void pre_assemble_algorithm(FILE* fp_as, FILE** fp_am){
 	
 	char* line = (char*)malloc(sizeof(char)*MAX_LENGTH);
 	char* next_start = line;
@@ -42,6 +42,7 @@ void shledi_pre_assemble(FILE* fp_as, FILE** fp_am){
 	item_ptr macro_list = NULL;
 	item_ptr current_macro;
 	item_ptr macro;
+	
 	while(fgets(line, MAX_LENGTH, fp_as)){
 		line_ptr temp;
 		word = (char*)malloc(sizeof(char)*MAX_LENGTH);
@@ -78,7 +79,7 @@ void shledi_pre_assemble(FILE* fp_as, FILE** fp_am){
 	}
 	
 	
-	print_macro_list(macro_list);
+	/*print_macro_list(macro_list);*/
 	
 }
 
