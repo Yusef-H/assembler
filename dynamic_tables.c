@@ -5,7 +5,12 @@
 /*
  	This file contains the implementation of the two dynamic tables:
  	1- Symbols table that is used in the first and second pass.
+ 	
+ 	
  	2- Macros table that is used during preprocessing.
+ 	   - This table is implemented using a linked list for every
+ 	     macro name, and each macro name will hold its lines as an
+ 	     inner linked list.
 */
 
 #include "assembler.h"
@@ -94,9 +99,18 @@ item_ptr does_macro_exist(item_ptr macro_head, char* name){
 	return NULL;
 }
 
+void write_macro_lines(item_ptr macro, FILE*** fp_am){
+	line_ptr temp;
+	temp = macro->lines;
+	while(temp != NULL){
+		fputs((temp)->line, (**fp_am));
+		temp = (temp)->next;
+	}
+}
+
 /* Prints the macros linked list and for each macro prints 
    the macro's lines linked list that the macro holds. */
-void print_macro_list(item_ptr macro_head){
+void print_macro_table(item_ptr macro_head){
 	while(macro_head){
 		printf("\n%s->", macro_head->name);
 		/* Printing Macro Lines: */

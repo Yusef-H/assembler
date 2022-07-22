@@ -5,17 +5,23 @@
 
 
 /*
- Macros table is built using 2 linked lists this way, one for the macro names,
- and an inner linked list for each macro which holds the lines inside the macro.
- So each macro item holds:
-	-The macro name.
-	-linked list of the lines inside the macro.
+	This file has all the implementations of the dynamic tables used 
+	in the project, which are:
 	
+	1- Macros linked list: 
+		each macro holds an inner linked list 
+		for the macro's lines. (used by the pre assembler).
+	    
+	2- Symbols linked list:
+		Each symbol holds the symbols name and it's address and another
+		type variable which holds two values (CODE/DATA).
+		
 */
 #include <stdio.h>
 #include <stdlib.h>
 #include "string.h"
 
+/*  */
 typedef struct macro_line* line_ptr;
 typedef struct macro_line{
 	char* line;
@@ -33,7 +39,8 @@ item_ptr add_new_macro(item_ptr *head_item, char* name);
 void add_macro_line(item_ptr *macro, char* macro_line);
 item_ptr does_macro_exist(item_ptr macro_head, char* name);
 void write_macro_lines_to_file(item_ptr*, FILE**);
-void print_macro_list(item_ptr);
+void print_macro_table(item_ptr);
+void write_macro_lines(item_ptr, FILE***);
 
 
 

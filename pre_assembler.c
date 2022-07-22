@@ -31,6 +31,10 @@ FILE* pre_assemble(FILE* fp_as, char* filename){
 	return fp_am;
 }
 
+
+/* Pre assemble algorithm (described in project instructions)
+   (The tables used for storing macros and macro lines are implemented
+    in dynamic_tables.c file).  */
 void pre_assemble_algorithm(FILE* fp_as, FILE** fp_am){
 	
 	char* line = (char*)malloc(sizeof(char)*MAX_LENGTH);
@@ -39,7 +43,7 @@ void pre_assemble_algorithm(FILE* fp_as, FILE** fp_am){
 	int macro_flag = OFF;
 	
 	/* Can be changed so we cant see implementation of list!!!!!!!! */
-	item_ptr macro_list = NULL;
+	item_ptr macro_table = NULL;
 	item_ptr current_macro;
 	item_ptr macro;
 	
@@ -48,38 +52,42 @@ void pre_assemble_algorithm(FILE* fp_as, FILE** fp_am){
 		word = (char*)malloc(sizeof(char)*MAX_LENGTH);
 		next_start = get_word(line, word); 
 		
-		if((macro = does_macro_exist(macro_list, word)) ){
-			temp = macro->lines;
-			while(temp != NULL){
-				fputs((temp)->line, (*fp_am));
-				temp = (temp)->next;
-			}
+		/* If macro name exists in table, then write its lines in the file: */
+		if((macro = does_macro_exist(macro_table, word)) ){
+			write_macro_lines(macro, &fp_am);
 		}
 		
-		
+		/* If its a start of macro, turn macro flag on and prepare for macro
+		   name to be added to macro table. */
 		else if(!strcmp(word, "macro")){
 			macro_flag = ON; 
+			
 			free(word);
 			word = (char*)malloc(sizeof(char)*MAX_LENGTH);
-
-			next_start = get_word(next_start, word);
+			next_start = get_word(next_start, word); /* Get macro name */
 			
-			current_macro = add_new_macro(&macro_list, word);
+			/* Add macro to table and set it as current macro, so all the 
+			   following lines until endmacro will be added to its lines
+			   in the table. */
+			current_macro = add_new_macro(&macro_table, word); 
 		}
 		else if(!strcmp(word, "endmacro")){
 			macro_flag = OFF;
 		}
+		/* Inside a macro, add lines to the current macro in the table. */
 		else if(macro_flag == ON){
 			add_macro_line(&current_macro, line);
 		}
+		/* A normal line and we can write it as is. */
 		else{
 			fputs(line, (*fp_am));
 		}
 		free(word);
 	}
+	free(line);
 	
 	
-	/*print_macro_list(macro_list);*/
+	print_macro_table(macro_table);
 	
 }
 

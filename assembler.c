@@ -23,6 +23,8 @@ int error_type;
    in the object file. */
 unsigned int data_segment[SIZE];
 unsigned int code_segment[SIZE];
+int IC = 0;
+
 
 /* The unique base 32 we got in the instructions. */
 /*const char base_32[32] = {
@@ -36,12 +38,12 @@ unsigned int code_segment[SIZE];
 /* 
 		foreach file in argv[1...argc-1]:
 		
-			Adds .s to file name
-			Opens file
-			Run pre_assembler on the .s file and create .am file.
+			***Adds .s to file name
+			***Opens file
+			***Run pre_assembler on the .s file and create .am file.
 			Run first pass on .am file
-			Run second pass on .am file
-			Close files
+			Run second pass on .am file create ob,ent,ext files.
+			Close file
 			
 	*/
 
