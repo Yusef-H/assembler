@@ -60,27 +60,36 @@ const char *commands[16] = {
 int main(int argc, char *argv[]){
 	FILE *fp_as; /* input file (.as) */
 	FILE *fp_am;
-	char* appended_filename;
+	char* appended_filename_as;
+	char* appended_filename_am;
 	int i;
+	char* line = (char*)malloc(sizeof(char)*MAX_LENGTH);
 	
 	for(i = 1; i<argc; i++){
-		appended_filename = append_filename(argv[i], AS); 
+		appended_filename_as = append_filename(argv[i], AS); 
+		appended_filename_am = append_filename(argv[i], AM);
 		
-		fp_as = fopen(appended_filename, "r");
+		fp_as = fopen(appended_filename_as, "r");
 		if(!fp_as){
 			error_type = OPEN_FILE;
 			throw_error(0);
 		}
 		
-		/*Creates .am file if there is any macros, otherwise we continue
-		  with fp_as. */
+		fp_am = fopen(appended_filename_am, "w+");
+		if(!fp_am){
+			error_type = OPEN_FILE;
+			throw_error(0);
+		}
 		
-		fp_am = pre_assemble(fp_as, argv[i]); 
+		/* Run pre assembler */
+		pre_assembler_algorithm(fp_as, fp_am); 
 		
-		/*fclose(fp_as);*/  /* Done with the input file. */
+		fclose(fp_as);  /* Done with the input file. */
+		
 		
 		/* First pass on fp_am */
-		/*first_pass(fp_am);*/
+		rewind(fp_am); /* rewind pointer to start of file. */
+		first_pass(fp_am);
 		
 		/* Second pass on fp_am */
 		

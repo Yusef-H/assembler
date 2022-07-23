@@ -1,1 +1,2 @@
-void first_pass(FILE**);
+void first_pass(FILE*);
+void parse_line(char*);

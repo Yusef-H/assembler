@@ -5,15 +5,6 @@ MAIN: 	mov r0,r1
       	not K
 LOOP:   jmp R
 		jsr S.2
-		cmp #-6,r1
-		not K
 		red W
-		prn K
-		inc r7
 K: 		.data -5
-		prn K
-		inc r7
 S: 		.struct 2,"ab"
-		cmp #-6,r1
-		not K
-		

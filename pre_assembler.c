@@ -15,34 +15,10 @@
 
 
 
-FILE* pre_assemble(FILE* fp_as, char* filename){
-	char* appended_filename;
-	
-	/* There's atleast one macro so we must create .am file */
-	if(check_for_macros(&fp_as)){
-		FILE* fp_am;
-		/* Create the .am file and open it */
-		appended_filename = append_filename(filename, AM);
-		fp_am = fopen(appended_filename, "w");
-		
-		/* Run pre assembler algorithm */
-		pre_assemble_algorithm(fp_as, &fp_am);
-		
-		/* Done pre assembling, close the file and return it. */
-		fclose(fp_am);
-		printf("\nPre assembling file *%s* done!\n",appended_filename);
-		return fp_am;
-	}
-	
-	/* There's no macros in the .as file so we proceed with .as file. */
-	return fp_as;
-}
-
-
-/* Pre assemble algorithm (described in project instructions)
+/* Pre assembler algorithm (described in project instructions)
    (The tables used for storing macros and macro lines are implemented
     in dynamic_tables.c file).  */
-void pre_assemble_algorithm(FILE* fp_as, FILE** fp_am){
+void pre_assembler_algorithm(FILE* fp_as, FILE* fp_am){
 	
 	char* line = (char*)malloc(sizeof(char)*MAX_LENGTH);
 	char* next_start = line;
@@ -60,7 +36,7 @@ void pre_assemble_algorithm(FILE* fp_as, FILE** fp_am){
 		
 		/* If macro name exists in table, then write its lines in the file: */
 		if((macro = does_macro_exist(macro_table, word)) ){
-			write_macro_lines(macro, &fp_am);
+			write_macro_lines(macro, fp_am);
 		}
 		
 		/* If its a start of macro, turn macro flag on and prepare for macro
@@ -86,7 +62,7 @@ void pre_assemble_algorithm(FILE* fp_as, FILE** fp_am){
 		}
 		/* A normal line and we can write it as is. */
 		else{
-			fputs(line, (*fp_am));
+			fputs(line, (fp_am));
 		}
 		free(word);
 	}
@@ -97,18 +73,6 @@ void pre_assemble_algorithm(FILE* fp_as, FILE** fp_am){
 	
 }
 
-int check_for_macros(FILE** fp_as){
-	char* line = (char*)malloc(sizeof(char)*MAX_LENGTH);
-	while(fgets(line, MAX_LENGTH, *fp_as)){
-		char* word = (char*)malloc(sizeof(char)*MAX_LENGTH);
-		get_word(line, word);
-		if(!strcmp(word, "endmacro")){
-			return TRUE;
-		}
-		free(word);
-	}
-	return FALSE;
-}
 
 
 

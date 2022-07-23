@@ -99,11 +99,11 @@ item_ptr does_macro_exist(item_ptr macro_head, char* name){
 	return NULL;
 }
 
-void write_macro_lines(item_ptr macro, FILE*** fp_am){
+void write_macro_lines(item_ptr macro, FILE* fp_am){
 	line_ptr temp;
 	temp = macro->lines;
 	while(temp != NULL){
-		fputs((temp)->line, (**fp_am));
+		fputs((temp)->line, (fp_am));
 		temp = (temp)->next;
 	}
 }
