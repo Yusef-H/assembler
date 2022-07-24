@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "assembler.h"
 
 /* pre assembler DS */
 typedef struct macro_line* line_ptr;
@@ -44,14 +45,19 @@ void print_macro_table(item_ptr);
 void write_macro_lines(item_ptr, FILE*);
 
 /* First pass DS */
-/*typedef struct label_item label_ptr;
+typedef struct label_item* label_ptr;
 typedef struct label_item{
-	char label[MAX_LABEL_LENGTH];
-	unsigned int address;
+	char* label_name;
+	int address;
 	int are; 
-};*/
+	int ext_flag;
+	int ent_flag;
+	label_ptr next;
+} label_item;
 
-
+label_ptr add_label(label_ptr*, char*);
+void delete_label(label_ptr* head,label_ptr*);
+void print_labels(label_ptr head);
 
 
 

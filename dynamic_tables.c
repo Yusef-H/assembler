@@ -56,7 +56,7 @@ item_ptr add_new_macro(item_ptr *head_item, char* name){
 /* Add a line to the macro item lines linked list. */
 void add_macro_line(item_ptr *macro, char* macro_line){
 	/* Allocate space for the new line item */
-	line_ptr new_line_item = (line_ptr)malloc(sizeof(line_ptr)); 
+	line_ptr new_line_item = (line_ptr)malloc(sizeof(macro_line)); 
 	line_ptr first,second; /* Pointers used to insert new item. */
 	/* Allocate space for the item's line field. */
 	new_line_item->line = (char*)malloc(sizeof(char)*MAX_LENGTH);
@@ -128,6 +128,89 @@ void print_macro_table(item_ptr macro_head){
 
 
 
+
+label_ptr add_label(label_ptr* head, char* name){
+	label_ptr new_label_item = (label_ptr)malloc(sizeof(label_item));
+	label_ptr temp;
+	int name_len = strlen(name);
+	if(!new_label_item){
+		fprintf(stderr,"Memory Allocation failed");
+		exit(1);
+	}
+	
+	/* 
+	 Does label name exists check
+	 */
+	if(name_len < MAX_LABEL_LENGTH){
+		new_label_item->label_name = (char*)calloc(sizeof(char),(name_len));
+		strcpy(new_label_item->label_name, name);
+/*		free(name);*/
+	}
+	else{
+		/*error*/
+	}
+
+	temp = *head;
+	if(!temp){
+		*head = new_label_item;
+		(*head)->next = NULL;
+		return head;
+	}
+	
+	
+/*	printf("\n\n%s",new_label_item->label_name);*/
+/*		printf("\n\n%s",name);*/
+
+
+	while(temp->next != NULL){
+		temp = temp->next;
+	}
+	temp->next = new_label_item;
+	new_label_item->next = NULL;
+	return new_label_item;
+}
+
+
+void delete_label(label_ptr* head, label_ptr* label){
+	label_ptr temp = *head;
+	label_ptr holder;
+	if(!temp){
+		return;
+	}
+	/* 1 or 2 items cases */
+	if(temp->label_name == (*label)->label_name){
+		if(temp->next){
+			*head = temp->next;
+			free(temp);
+			return;
+		}
+		else{
+			free(temp);
+			return;
+		}
+	}
+	holder = temp;
+	temp = temp->next;
+	while(temp){
+		if(temp->label_name == (*label)->label_name){
+			holder->next = NULL;
+			free(temp);
+			return;
+		}
+		holder = temp;
+		temp = temp->next;
+	}
+	/* Error */
+	
+}
+
+void print_labels(label_ptr head){
+	while(head){
+		printf("%s->",head->label_name);
+		head = head -> next;
+	}
+	printf(";;");
+}
 
 
 
