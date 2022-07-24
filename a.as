@@ -4,6 +4,7 @@ MAIN: 	mov r0,r1
       	sub S.2,W
       	not K
 LOOP:   jmp R
+r7:     jmp R
 		macro m1
 		prn K
 		inc r7

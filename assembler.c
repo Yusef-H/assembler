@@ -25,7 +25,7 @@ word data_segment[SIZE];
 word code_segment[SIZE];
 
 /* directives */
-const char *directives[5] = { 
+const char *directives[NUM_DIRECTIVES] = { 
 	".data", ".string", ".struct", ".entry", ".extern"
 };
 
@@ -37,9 +37,14 @@ const char base_32[32] = {
 };
 
 /* Instruction commands */
-const char *commands[16] = { 
-	"mov", "cmp", "add", "sub", "not", "clr", "lea", "inc"
+const char *commands[NUM_COMMANDS] = { 
+	"mov", "cmp", "add", "sub", "not", "clr", "lea", "inc",
 	"dec", "jmp", "bne", "get", "prn", "jsr", "rts", "hlt"
+};
+
+/* registers */
+const char *registers[NUM_REGISTERS] = {
+	"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7"
 };
 
 

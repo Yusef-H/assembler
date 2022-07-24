@@ -8,10 +8,12 @@
 #include "utilities.h"
 #include "first_pass.h"
 
+extern int error_type;
 extern word data_segment[SIZE];
 extern word code_segment[SIZE];
 int IC = 0;
 int DC = 0;
+int line_number;
 /*
 	This file handles the first pass on the file
 	
@@ -26,14 +28,16 @@ int DC = 0;
 void first_pass(FILE* fp_am){
 	/* Initializing DC and IC. */
 	char* line = (char*)malloc(sizeof(char)*MAX_LENGTH);
-	int line_number = 1;
+	line_number = 1;
 	label_ptr label_table = NULL;
 	
 	
 	while(fgets(line, MAX_LENGTH, fp_am)){
 		/* ignore if empty line */
 		parse_line(line, &label_table);
-		
+		if(error_type != NO_ERROR){
+			throw_error();
+		}
 		 
 		line_number++;	
 	
@@ -63,6 +67,9 @@ void parse_line(char* line, label_ptr* label_table){
 	
 	next_word_start = get_word(line, word);
 	if(is_label(word, label_name)){
+		if(error_type != NO_ERROR){
+			return;
+		}
 	
 /*		if(label_flag == ON){*/
 /*			ERROR!*/
@@ -86,7 +93,7 @@ void parse_line(char* line, label_ptr* label_table){
 /*				 delete label item from label table   */
 			}
 			else{
-				label_item->address = DC++;	
+				label_item->address = DC++;
 			}
 		/*deal with all directives depending on directive type (switch) dc */
 		
@@ -119,8 +126,9 @@ int is_label(char* word, char* label_name){
 	
 	/* label must start with an alphabetical character */
 	if(!isalpha(*word)){
-		return NULL;
+		return FALSE;
 	}
+	
 	while(isalnum(*temp)){
 		temp++;
 	}
@@ -132,9 +140,13 @@ int is_label(char* word, char* label_name){
 			temp++;
 		}
 		*temp2 = '\0';
-		return label_name;
+		/* check for reserved word */
+		if(is_reserved_word(label_name)){
+			error_type = RESERVED_WORD_LABEL_NAME;
+		}
+		return TRUE;
 	}
-	return NULL;
+	return FALSE;
 	
 }
 
@@ -162,9 +174,9 @@ int is_directive(char* word){
 
 }
 
-/*int is_command(char* word){*/
-
-/*}*/
+int is_command(char* word){
+	
+}
 
 
 

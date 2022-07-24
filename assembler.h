@@ -9,13 +9,14 @@
 
 /* constants */
 #define NUM_DIRECTIVES 5
-
+#define NUM_COMMANDS 16
+#define NUM_REGISTERS 8
 
 /* file types */
 enum file_types{AS, AM, OB, EXT, ENT};
 
 /* error types */
-enum error_types{OPEN_FILE};
+enum error_types{NO_ERROR, OPEN_FILE, RESERVED_WORD_LABEL_NAME};
 
 /* Directives */
 enum directive_types{NOT_DIRECTIVE, DATA, STRING, STRUCT, ENTRY, EXTERN};

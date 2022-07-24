@@ -8,16 +8,25 @@
 /* remove them to header files later */
 #define MAX_APPEND 5
 extern int error_type;
+extern int line_number;
 
-void throw_error(int line_number){
+extern const char *directives[NUM_DIRECTIVES];
+extern const char *commands[NUM_COMMANDS];
+extern const char *registers[NUM_REGISTERS];
+
+void throw_error(){
 	if(error_type == OPEN_FILE){
 		fprintf(stderr, "Cannot open the file.");
 		return;
 	}
 	
 	switch(error_type){
-	
+		case RESERVED_WORD_LABEL_NAME:
+			printf("Illegal label name in line %d",line_number);
+			break;
 	}
+	error_type = NO_ERROR;
+	return;
 }
 
 
@@ -77,6 +86,33 @@ char* get_word(char* line, char* word){
 void empty_word(char* word){
 	
 }
+
+int is_reserved_word(char* word){
+	int i;
+	for(i = 0; i < NUM_DIRECTIVES; i++){
+		if(!strcmp(directives[i], word)){
+			return TRUE;
+		}
+	}
+	for(i = 0; i < NUM_REGISTERS; i++){
+		if(!strcmp(registers[i],word)){
+			return TRUE;
+		}
+	}
+	for(i = 0; i < NUM_COMMANDS; i++){
+		if(!strcmp(commands[i], word)){
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+
+
+
+
+
+
 
 
 

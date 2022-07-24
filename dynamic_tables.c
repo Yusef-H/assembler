@@ -128,11 +128,13 @@ void print_macro_table(item_ptr macro_head){
 
 
 
-
+/* Add new label to the labels table */
 label_ptr add_label(label_ptr* head, char* name){
+	/* Allocate memory for new label item */
 	label_ptr new_label_item = (label_ptr)malloc(sizeof(label_item));
 	label_ptr temp;
 	int name_len = strlen(name);
+	/* malloc check */
 	if(!new_label_item){
 		fprintf(stderr,"Memory Allocation failed");
 		exit(1);
@@ -144,23 +146,18 @@ label_ptr add_label(label_ptr* head, char* name){
 	if(name_len < MAX_LABEL_LENGTH){
 		new_label_item->label_name = (char*)calloc(sizeof(char),(name_len));
 		strcpy(new_label_item->label_name, name);
-/*		free(name);*/
 	}
 	else{
 		/*error*/
 	}
 
 	temp = *head;
+	/* if empty */
 	if(!temp){
 		*head = new_label_item;
 		(*head)->next = NULL;
-		return head;
+		return *head;
 	}
-	
-	
-/*	printf("\n\n%s",new_label_item->label_name);*/
-/*		printf("\n\n%s",name);*/
-
 
 	while(temp->next != NULL){
 		temp = temp->next;
@@ -192,7 +189,7 @@ void delete_label(label_ptr* head, label_ptr* label){
 	holder = temp;
 	temp = temp->next;
 	while(temp){
-		if(temp->label_name == (*label)->label_name){
+		if(!(strcmp(temp->label_name,(*label)->label_name))){
 			holder->next = NULL;
 			free(temp);
 			return;
