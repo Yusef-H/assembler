@@ -206,7 +206,7 @@ void delete_label(label_ptr* head, label_ptr* label){
 
 void print_labels(label_ptr head){
 	while(head){
-		printf("%s->",head->label_name);
+		printf("%s  %d->",head->label_name, head->address);
 		head = head -> next;
 	}
 	printf(";;");

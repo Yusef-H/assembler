@@ -10,6 +10,8 @@
 
 extern word data_segment[SIZE];
 extern word code_segment[SIZE];
+int IC = 0;
+int DC = 0;
 /*
 	This file handles the first pass on the file
 	
@@ -23,8 +25,6 @@ extern word code_segment[SIZE];
 
 void first_pass(FILE* fp_am){
 	/* Initializing DC and IC. */
-	int IC = 0;
-	int DC = 0;
 	char* line = (char*)malloc(sizeof(char)*MAX_LENGTH);
 	int line_number = 1;
 	label_ptr label_table = NULL;
@@ -80,21 +80,19 @@ void parse_line(char* line, label_ptr* label_table){
 	/* Next word must be a start of instruction line (command) or
 	                     a start of directive line.  */
 	
-/*	if((directive = is_directive(word))){*/
-/*		if(label_flag == ON){*/
-/*			if(directive == ENTRY || directive == EXTERN){*/
-				/* delete label item from label table   */
-/*			}*/
-/*			else{*/
-				/* set label item address to */
-/*			}*/
+	if((directive = is_directive(word))){
+		if(label_flag == ON){
+			if(directive == ENTRY || directive == EXTERN){
+/*				 delete label item from label table   */
+			}
+			else{
+				label_item->address = DC++;	
+			}
 		/*deal with all directives depending on directive type (switch) dc */
 		
+		}
 		
-		
-/*		}*/
-		
-/*	}*/
+	}
 /*	else if((cmd = is_command(word))){*/
 /*		if(label_flag == ON){*/
 			/*
