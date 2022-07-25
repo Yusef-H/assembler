@@ -16,15 +16,14 @@
 enum file_types{AS, AM, OB, EXT, ENT};
 
 /* error types */
-enum error_types{NO_ERROR, OPEN_FILE, RESERVED_WORD_LABEL_NAME};
+enum error_types{
+	NO_ERROR, OPEN_FILE, RESERVED_WORD_LABEL_NAME, ILLEGAL_DATA_PARAMETER,
+	ILLEGAL_COMMA
+};
 
 /* Directives */
 enum directive_types{NOT_DIRECTIVE, DATA, STRING, STRUCT, ENTRY, EXTERN};
 
-/* word types */
-typedef struct {
-	unsigned int bits:10;
-} word;
 
 /* Flags */
 #define OFF 0

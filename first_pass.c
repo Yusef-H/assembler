@@ -9,8 +9,8 @@
 #include "first_pass.h"
 
 extern int error_type;
-extern word data_segment[SIZE];
-extern word code_segment[SIZE];
+extern unsigned int data_segment[SIZE];
+extern unsigned int code_segment[SIZE];
 int IC = 0;
 int DC = 0;
 int line_number;
@@ -19,17 +19,17 @@ int line_number;
 	
 	During the first pass:
 	- Add all labels to the symbol table.
-	- encode the data instructions (.data 1,2,3) to the data segment)
-	  using methods from utils file.
+	- encode the data instructions (.data 1,2,3) to the data segment).
 	- Check for possible errors and output them.
 */
 
 
 void first_pass(FILE* fp_am){
-	/* Initializing DC and IC. */
+	int i;
 	char* line = (char*)malloc(sizeof(char)*MAX_LENGTH);
-	line_number = 1;
 	label_ptr label_table = NULL;
+	line_number = 1;
+	
 	
 	
 	while(fgets(line, MAX_LENGTH, fp_am)){
@@ -45,6 +45,10 @@ void first_pass(FILE* fp_am){
 	
 	free(line);
 	print_labels(label_table);
+	
+	for(i=0; i<DC; i++){
+		printf("%u ",data_segment[i]);
+	}
 	/* 
 	 Update the labels table addresses by adding ic to each one.
 	 */
@@ -70,10 +74,6 @@ void parse_line(char* line, label_ptr* label_table){
 		if(error_type != NO_ERROR){
 			return;
 		}
-	
-/*		if(label_flag == ON){*/
-/*			ERROR!*/
-/*		}*/
 
 		label_flag = ON;
 		label_item = add_label(label_table, label_name);
@@ -93,9 +93,15 @@ void parse_line(char* line, label_ptr* label_table){
 /*				 delete label item from label table   */
 			}
 			else{
-				label_item->address = DC++;
+				printf("\nDC: %d\n",DC);
+				label_item->address = DC;
 			}
-		/*deal with all directives depending on directive type (switch) dc */
+			
+		/*
+		deal with all directives depending on directive type (switch) dc 
+		*/	
+			directive_handler(directive, next_word_start);
+		
 		
 		}
 		
@@ -178,6 +184,82 @@ int is_command(char* word){
 	
 }
 
+void directive_handler(int directive, char* params){
+	switch(directive){
+		case DATA:
+			data_directive_handler(params);
+			break;
+		case STRING:
+			/*string_directive_handler(params);*/
+			break;
+		case STRUCT:
+			/*struct_directive_handler(params);*/
+			break;
+		/* ext ent */
+	}
+	return;
+}
+
+void data_directive_handler(char* params){
+	char* temp_params = params;
+	char* number;
+	char* temp_num;
+	while(*temp_params != '\n' && *temp_params != '\0' && *temp_params != EOF){
+		number = (char*)malloc(sizeof(char)*MAX_LENGTH);
+		if(!number){
+			printf("Memory allocation failed.");
+			exit(1);
+		}
+		temp_params = skip_whitespaces(temp_params);
+		temp_num = number;
+		
+		/* Error checks */
+		if(!(isdigit(*temp_params))){
+			
+			if(*temp_params != '+' && *temp_params != '-' &&
+			   *temp_params != '\n' && *temp_params != '\0' &&
+			   *temp_params != ','){
+			   
+			   	temp_params++;
+				error_type = ILLEGAL_DATA_PARAMETER;
+				throw_error();
+				return;
+			}
+			/* deal with + or - */
+			if(*temp_params == '+' || *temp_params == '-')
+				temp_params++;
+				
+			/* deal with comma and its errors */
+			if(*temp_params == ','){
+				temp_params++;
+				temp_params = skip_whitespaces(temp_params);
+				if(*temp_params == '\n'){
+					error_type = ILLEGAL_COMMA;
+					throw_error();
+					temp_params++;
+				}
+				if(*temp_params == ','){
+					error_type = ILLEGAL_COMMA;
+					throw_error();
+					temp_params++;
+				}
+				
+			}
+		}
+		skip_whitespaces(temp_params);
+		while(isdigit(*temp_params)){
+			*temp_num++ = *temp_params++;
+		}
+		temp_num = '\0';
+		encode_in_data_segment(atoi(number));
+		free(number);
+		
+	}
+}
+
+void encode_in_data_segment(int value){
+	data_segment[DC++] = (unsigned int)value;
+}
 
 
 

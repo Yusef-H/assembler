@@ -21,8 +21,8 @@ int error_type;
 
 /* Code segment and Data segment arrays in order to split them
    in the object file. */
-word data_segment[SIZE];
-word code_segment[SIZE];
+unsigned int data_segment[SIZE];
+unsigned int code_segment[SIZE];
 
 /* directives */
 const char *directives[NUM_DIRECTIVES] = { 

@@ -5,6 +5,7 @@
 		endmacro     	
       	k7
       	k7
+NEW:    .data 3 ,5,6,7
 LOOP:   jmp R
 		macro m1
 		prn K
@@ -13,8 +14,7 @@ LOOP:   jmp R
 		jsr S.2
 		red W
 		m1
-K: 		.data -5
-		m1
+X:		.data 2
 		macro s8
 		jmp s8
 		jmp s8

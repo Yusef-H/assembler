@@ -4,14 +4,13 @@
 		mov r0,r1
 		cmp #-5,K
 		cmp #2,S.1
+NEW:    .data 3 ,5,6,7
 LOOP:   jmp R
 		jsr S.2
 		red W
 		prn K
 		inc r7
-K: 		.data -5
-		prn K
-		inc r7
+X:		.data 2
 		jmp s8
 		jmp s8
 		hello

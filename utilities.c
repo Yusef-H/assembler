@@ -22,8 +22,13 @@ void throw_error(){
 	
 	switch(error_type){
 		case RESERVED_WORD_LABEL_NAME:
-			printf("Illegal label name in line %d",line_number);
+			printf("Illegal label name in line %d.",line_number);
 			break;
+		case ILLEGAL_DATA_PARAMETER:
+			printf("\nIllegal data directive parameters in line %d.\n",line_number);
+			break;
+		case ILLEGAL_COMMA:
+			printf("\nIllegal comma in line %d.\n",line_number);
 	}
 	error_type = NO_ERROR;
 	return;
@@ -75,7 +80,8 @@ char* get_word(char* line, char* word){
 	
 	/* copy the word */
 	
-	while(*line != ' ' && *line != '\t' && *line != '\n' && *line != '\0'){
+	while(*line != ' ' && *line != '\t' && *line != '\n' && *line != '\0' &&
+		  *line != ','){
 		word[i++] = *line;
 		line++;
 	}
@@ -105,6 +111,13 @@ int is_reserved_word(char* word){
 		}
 	}
 	return FALSE;
+}
+
+char* skip_whitespaces(char* line){
+	while( *line == ' ' || *line == '\t'){
+		line++;
+	}
+	return line;
 }
 
 

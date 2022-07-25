@@ -69,7 +69,7 @@ void pre_assembler_algorithm(FILE* fp_as, FILE* fp_am){
 	free(line);
 	
 	
-	print_macro_table(macro_table);
+	/*print_macro_table(macro_table);*/
 	
 }
 
