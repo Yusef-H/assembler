@@ -29,6 +29,10 @@ void throw_error(){
 			break;
 		case ILLEGAL_COMMA:
 			printf("\nIllegal comma in line %d.\n",line_number);
+			break;
+		case MISSING_COMMA:
+			printf("\nMissing comma in line %d.\n",line_number);
+			break;
 	}
 	error_type = NO_ERROR;
 	return;
@@ -67,15 +71,16 @@ char* append_filename(char* filename, int append_type){
    we need to read from.
    returns the next word in the line starting from start_char.  */
 char* get_word(char* line, char* word){
-	
 	int i = 0;
+	
 	/* skip whitespaces */
-	while( *line == ' ' || *line == '\t'){
-		line++;
-	}
+	line = skip_whitespaces(line);
+	
+	
 	if(*line == ','){
 		strcpy(word, ",");
-		return ++line;
+		line++; /* point to next char after ',' */
+		return line;
 	}
 	
 	/* copy the word */
@@ -119,6 +124,15 @@ char* skip_whitespaces(char* line){
 	}
 	return line;
 }
+
+char* skip_line(char* line){
+	while(*line != '\n' || *line != EOF){
+		line++;
+	}
+	return line;
+}
+
+
 
 
 

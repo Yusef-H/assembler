@@ -93,7 +93,6 @@ void parse_line(char* line, label_ptr* label_table){
 /*				 delete label item from label table   */
 			}
 			else{
-				printf("\nDC: %d\n",DC);
 				label_item->address = DC;
 			}
 			
@@ -181,7 +180,40 @@ int is_directive(char* word){
 }
 
 int is_command(char* word){
-	
+	if(!strcmp(word,"mov"))
+		return MOV;
+	else if(!strcmp(word,"cmp"))
+		return CMP;
+	else if(!strcmp(word,"add"))
+		return ADD;
+	else if(!strcmp(word,"sub"))
+		return SUB;
+	else if(!strcmp(word,"not"))
+		return NOT;
+	else if(!strcmp(word,"clr"))
+		return CLR;	
+	else if(!strcmp(word,"lea"))
+		return LEA;	
+	else if(!strcmp(word,"inc"))
+		return INC;	
+	else if(!strcmp(word,"dec"))
+		return DEC;	
+	else if(!strcmp(word,"jmp"))
+		return JMP;	
+	else if(!strcmp(word,"bne"))
+		return BNE;	
+	else if(!strcmp(word,"get"))
+		return GET;	
+	else if(!strcmp(word,"prn"))
+		return PRN;	
+	else if(!strcmp(word,"jsr"))
+		return JSR;	
+	else if(!strcmp(word,"rts"))
+		return RTS;	
+	else if(!strcmp(word,"hlt"))
+		return HLT;	
+	else
+		return NOT_CMD;
 }
 
 void directive_handler(int directive, char* params){
@@ -196,15 +228,23 @@ void directive_handler(int directive, char* params){
 			/*struct_directive_handler(params);*/
 			break;
 		/* ext ent */
+	
 	}
 	return;
 }
-
+/*
+	Data Directive Handler function.
+	Encodes the data directives in the data segment while carefully checking
+	for errors and printing them.
+*/
 void data_directive_handler(char* params){
 	char* temp_params = params;
 	char* number;
 	char* temp_num;
+	int got_num_flag;
 	while(*temp_params != '\n' && *temp_params != '\0' && *temp_params != EOF){
+		got_num_flag = OFF;
+		
 		number = (char*)malloc(sizeof(char)*MAX_LENGTH);
 		if(!number){
 			printf("Memory allocation failed.");
@@ -212,23 +252,24 @@ void data_directive_handler(char* params){
 		}
 		temp_params = skip_whitespaces(temp_params);
 		temp_num = number;
-		
+
 		/* Error checks */
 		if(!(isdigit(*temp_params))){
-			
+
 			if(*temp_params != '+' && *temp_params != '-' &&
 			   *temp_params != '\n' && *temp_params != '\0' &&
 			   *temp_params != ','){
-			   
+
 			   	temp_params++;
 				error_type = ILLEGAL_DATA_PARAMETER;
 				throw_error();
 				return;
 			}
 			/* deal with + or - */
-			if(*temp_params == '+' || *temp_params == '-')
-				temp_params++;
-				
+			if(*temp_params == '+' || *temp_params == '-'){
+				*temp_num++ = *temp_params++;
+			}
+
 			/* deal with comma and its errors */
 			if(*temp_params == ','){
 				temp_params++;
@@ -237,25 +278,38 @@ void data_directive_handler(char* params){
 					error_type = ILLEGAL_COMMA;
 					throw_error();
 					temp_params++;
+					return;
 				}
 				if(*temp_params == ','){
 					error_type = ILLEGAL_COMMA;
 					throw_error();
 					temp_params++;
+					return;
 				}
-				
+
 			}
 		}
 		skip_whitespaces(temp_params);
 		while(isdigit(*temp_params)){
+			got_num_flag = ON;
 			*temp_num++ = *temp_params++;
 		}
 		temp_num = '\0';
+		if(isdigit(*(skip_whitespaces(temp_params))) && got_num_flag){
+			error_type = MISSING_COMMA;
+			throw_error();
+			return;
+		}
 		encode_in_data_segment(atoi(number));
 		free(number);
-		
+
 	}
 }
+
+		
+	
+
+
 
 void encode_in_data_segment(int value){
 	data_segment[DC++] = (unsigned int)value;

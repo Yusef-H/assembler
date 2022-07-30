@@ -13,3 +13,5 @@ void empty_word(char*);
 int is_reserved_word(char*);
 
 char* skip_whitespaces(char* );
+
+char* skip_line(char*);

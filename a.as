@@ -3,8 +3,7 @@ MAIN: 	mov r0,r1
      	cmp #2,S.1
       	sub S.2,W
       	not K
-LOOP:   jmp R
-r7:     jmp R
+Q:		.data 1,2,3,4,544,
 		macro m1
 		prn K
 		inc r7
@@ -17,7 +16,7 @@ r7:     jmp R
 		m6
 		red W
 		m1
-K: 		.data -5
+K: 		.data 16
 		m1
 S: 		.struct 2,"ab"
 		m6

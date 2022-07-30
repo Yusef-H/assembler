@@ -18,11 +18,15 @@ enum file_types{AS, AM, OB, EXT, ENT};
 /* error types */
 enum error_types{
 	NO_ERROR, OPEN_FILE, RESERVED_WORD_LABEL_NAME, ILLEGAL_DATA_PARAMETER,
-	ILLEGAL_COMMA
+	ILLEGAL_COMMA, MISSING_COMMA
 };
 
 /* Directives */
 enum directive_types{NOT_DIRECTIVE, DATA, STRING, STRUCT, ENTRY, EXTERN};
+
+/* Commands */
+enum command_types{NOT_CMD, MOV, CMP, ADD, SUB, NOT, CLR, LEA, INC, DEC,
+                   JMP, BNE, GET, PRN, JSR, RTS, HLT};
 
 
 /* Flags */
