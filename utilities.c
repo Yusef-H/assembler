@@ -36,6 +36,15 @@ void throw_error(){
 		case NO_NUMBER_AFTER_SIGN:
 			printf("\nNo number after sign in line %d.\n",line_number);
 			break;
+		case INVALID_STRING:
+			printf("\nInvalid string parameter in line %d.\n", line_number);
+			break;
+		case EXTRA_TEXT_AFTER_STRING:
+			printf("\nExtraneous text after string parameter in line %d.\n", line_number);
+			break;
+		case MISSING_FIELDS:
+			printf("\nMissing struct fields in line %d.\n",line_number);
+			break;
 	}
 	error_type = NO_ERROR;
 	return;
@@ -133,6 +142,10 @@ char* skip_line(char* line){
 		line++;
 	}
 	return line;
+}
+
+int is_end_of_line(char c){
+	return (c == '\n' || c == EOF);
 }
 
 

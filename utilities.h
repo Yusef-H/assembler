@@ -15,3 +15,5 @@ int is_reserved_word(char*);
 char* skip_whitespaces(char* );
 
 char* skip_line(char*);
+
+int is_end_of_line(char c);

@@ -51,6 +51,7 @@ void first_pass(FILE* fp_am){
 	for(i=0; i<DC; i++){
 		printf("%u ",data_segment[i]);
 	}
+	printf("\n\n");
 	/* 
 	 Update the labels table addresses by adding ic to each one.
 	 */
@@ -157,6 +158,8 @@ int is_label(char* word, char* label_name){
 	
 }
 
+/* checks if a string is a valid directive and returns an int representing
+   the directive so we can handle it and its parameters. */
 int is_directive(char* word){
 	if(*word != '.'){
 		return NOT_DIRECTIVE;
@@ -181,6 +184,7 @@ int is_directive(char* word){
 
 }
 
+/* Checks if a string is a command and returns an int representing it. */
 int is_command(char* word){
 	if(!strcmp(word,"mov"))
 		return MOV;
@@ -224,10 +228,10 @@ void directive_handler(int directive, char* params){
 			data_directive_handler(params);
 			break;
 		case STRING:
-			/*string_directive_handler(params);*/
+			string_directive_handler(params);
 			break;
 		case STRUCT:
-			/*struct_directive_handler(params);*/
+			struct_directive_handler(params);
 			break;
 		/* ext ent */
 	
@@ -237,28 +241,37 @@ void directive_handler(int directive, char* params){
 /*
 	Data Directive Handler function.
 	Encodes the data directives in the data segment while carefully checking
-	for errors and printing them.
+	for errors.
 */
 void data_directive_handler(char* params){
-	char* temp_params = params;
-	char* number;
-	char* temp_num;
-	char next_char;
-	int got_num_flag;
+	char* temp_params = params; /* Will point to the next parameter */
+	char* number; /* holds number parameter to encode them using atoi*/
+	char* temp_num; /* pointer to the number parameter */
+	char next_char; /* holds next char after reading a number parameter */
+	int got_num_flag; /* flag that gets turned on when we get a number */
+	
 	while(*temp_params != '\n' && *temp_params != '\0' && *temp_params != EOF){
-		got_num_flag = OFF;
+		got_num_flag = OFF; /* initialize flag */
 		
-		number = (char*)malloc(sizeof(char)*MAX_LENGTH);
+		/* new number parameter */
+		number = (char*)malloc(sizeof(char)*MAX_LENGTH); 
 		if(!number){
 			printf("Memory allocation failed.");
 			exit(1);
 		}
+		
+		/* skip whitespaces */
 		temp_params = skip_whitespaces(temp_params);
+		
+		/* point temp_num at number memory start to start copying */
 		temp_num = number;
 
-		/* Error checks */
-		if(!(isdigit(*temp_params))){
+		/* Error checks for data parameters*/
+		
 
+		if(!(isdigit(*temp_params))){ /* if not a number */
+			
+			/* if its none of these chars then its illegal */
 			if(*temp_params != '+' && *temp_params != '-' &&
 			   *temp_params != '\n' && *temp_params != '\0' &&
 			   *temp_params != ','){
@@ -269,20 +282,18 @@ void data_directive_handler(char* params){
 				return;
 			}
 			
-			
-			/* check .data 2,+, */
-			
-			
-			/* deal with comma and its errors */
+			/* handle comma and its errors */
 			if(*temp_params == ','){
 				temp_params++;
 				temp_params = skip_whitespaces(temp_params);
+				/* after comma its either new line or a parameter */
 				if(*temp_params == '\n'){
 					error_type = ILLEGAL_COMMA;
 					throw_error();
 					temp_params++;
 					return;
 				}
+				/* illegal extra comma */
 				if(*temp_params == ','){
 					error_type = ILLEGAL_COMMA;
 					throw_error();
@@ -291,7 +302,7 @@ void data_directive_handler(char* params){
 				}
 
 			}
-			/* deal with + or - */
+			/* handle + and - */
 			if(*temp_params == '+' || *temp_params == '-'){
 				*temp_num++ = *temp_params++;
 				/* Must be a digit after + or - */
@@ -327,6 +338,74 @@ void data_directive_handler(char* params){
 
 	}
 }
+
+void string_directive_handler(char* string){
+	string = skip_whitespaces(string);
+	if(*string != '"'){
+		error_type = INVALID_STRING;
+		return;
+	}
+	string++;
+	while( !(is_end_of_line(*string)) && *string != '"'){
+		encode_in_data_segment((unsigned int)*string);
+		string++;
+	}
+	if(*string != '"'){
+		error_type = INVALID_STRING;
+		return;
+	}
+	string++;
+	string = skip_whitespaces(string);
+	if(!(is_end_of_line(*string))){
+		error_type = EXTRA_TEXT_AFTER_STRING;
+		return;
+	}
+	encode_in_data_segment('\0'); /* end of legal string */
+}
+
+void struct_directive_handler(char* params){
+	char* number_param = (char*)malloc(sizeof(char)*MAX_LENGTH);
+	char* number_ptr = number_param;
+	if(!number_param){
+		printf("Memory allocation failed");
+		exit(1);
+	}
+	
+	params = skip_whitespaces(params);
+	if(is_end_of_line(*params)){
+		error_type = MISSING_FIELDS;
+		return;
+	}
+	if(*params == '+' || *params == '-')
+		params++;
+	/* get number parameter */
+	while(isdigit(*params)){
+		*number_ptr++ = *params++;
+	}
+	/* must find comma after */
+	params = skip_whitespaces(params);
+	if(*params != ','){
+		error_type = MISSING_COMMA;
+		return;
+	}
+	params++;
+	/* check for illegal comma, missing string parameter */
+	params = skip_whitespaces(params);
+	if(*params == ','){
+		error_type = ILLEGAL_COMMA;
+		return;
+	}
+	if(is_end_of_line(*params)){
+		error_type = MISSING_FIELDS;
+		return;
+	}
+	
+	encode_in_data_segment(atoi(number_param));
+	
+	string_directive_handler(params);
+}
+
+
 
 		
 	

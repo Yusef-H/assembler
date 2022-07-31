@@ -3,7 +3,7 @@ MAIN: 	mov r0,r1
      	cmp #2,S.1
       	sub S.2,W
       	not K
-Q:		.data 1,2,3,x4,544,
+Q:		.data 1,2,3,4,544,
 		jsr S.2
 		cmp #-6,r1
 		not K
