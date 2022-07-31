@@ -34,6 +34,8 @@ void first_pass(FILE* fp_am){
 	
 	while(fgets(line, MAX_LENGTH, fp_am)){
 		/* ignore if empty line */
+		if(*line == '\n')
+			continue;
 		parse_line(line, &label_table);
 		if(error_type != NO_ERROR){
 			throw_error();
@@ -45,7 +47,7 @@ void first_pass(FILE* fp_am){
 	
 	free(line);
 	print_labels(label_table);
-	
+	printf("\n\n");
 	for(i=0; i<DC; i++){
 		printf("%u ",data_segment[i]);
 	}
@@ -241,6 +243,7 @@ void data_directive_handler(char* params){
 	char* temp_params = params;
 	char* number;
 	char* temp_num;
+	char next_char;
 	int got_num_flag;
 	while(*temp_params != '\n' && *temp_params != '\0' && *temp_params != EOF){
 		got_num_flag = OFF;
@@ -265,11 +268,11 @@ void data_directive_handler(char* params){
 				throw_error();
 				return;
 			}
-			/* deal with + or - */
-			if(*temp_params == '+' || *temp_params == '-'){
-				*temp_num++ = *temp_params++;
-			}
-
+			
+			
+			/* check .data 2,+, */
+			
+			
 			/* deal with comma and its errors */
 			if(*temp_params == ','){
 				temp_params++;
@@ -288,6 +291,16 @@ void data_directive_handler(char* params){
 				}
 
 			}
+			/* deal with + or - */
+			if(*temp_params == '+' || *temp_params == '-'){
+				*temp_num++ = *temp_params++;
+				/* Must be a digit after + or - */
+				if(!isdigit(*temp_params)){
+					error_type = NO_NUMBER_AFTER_SIGN;
+					throw_error();
+					return;
+				}
+			}
 		}
 		skip_whitespaces(temp_params);
 		while(isdigit(*temp_params)){
@@ -295,12 +308,21 @@ void data_directive_handler(char* params){
 			*temp_num++ = *temp_params++;
 		}
 		temp_num = '\0';
-		if(isdigit(*(skip_whitespaces(temp_params))) && got_num_flag){
+		/* next non whitespace char after a number can be either a comma
+		   or a new line character if end of line or eof if end of file */
+		next_char = *(skip_whitespaces(temp_params));
+		if(isdigit(next_char) && got_num_flag){
 			error_type = MISSING_COMMA;
 			throw_error();
 			return;
 		}
-		encode_in_data_segment(atoi(number));
+		if(next_char != ',' && next_char != '\n' && next_char != EOF){
+			error_type = ILLEGAL_DATA_PARAMETER;
+			throw_error();
+			return;
+		}
+		if(got_num_flag)
+			encode_in_data_segment(atoi(number));
 		free(number);
 
 	}

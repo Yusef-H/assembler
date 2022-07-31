@@ -33,6 +33,9 @@ void throw_error(){
 		case MISSING_COMMA:
 			printf("\nMissing comma in line %d.\n",line_number);
 			break;
+		case NO_NUMBER_AFTER_SIGN:
+			printf("\nNo number after sign in line %d.\n",line_number);
+			break;
 	}
 	error_type = NO_ERROR;
 	return;
