@@ -37,5 +37,8 @@ enum command_types{NOT_CMD, MOV, CMP, ADD, SUB, NOT, CLR, LEA, INC, DEC,
 #define TRUE 1
 #define FALSE 0
 
+/* unique values */
+#define NONE -1
+
 
 #endif

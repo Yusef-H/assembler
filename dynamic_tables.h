@@ -49,7 +49,7 @@ typedef struct label_item* label_ptr;
 typedef struct label_item{
 	char* label_name;
 	int address;
-	int are; 
+	int code_flag; 
 	int ext_flag;
 	int ent_flag;
 	label_ptr next;

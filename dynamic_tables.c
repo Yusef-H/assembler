@@ -203,7 +203,7 @@ void delete_label(label_ptr* head, label_ptr* label){
 
 void print_labels(label_ptr head){
 	while(head){
-		printf("%s  %d->",head->label_name, head->address);
+		printf("%s, %d, %d->",head->label_name, head->address, head->code_flag);
 		head = head -> next;
 	}
 	printf(";;");

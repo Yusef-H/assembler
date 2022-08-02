@@ -22,7 +22,7 @@ void throw_error(){
 	
 	switch(error_type){
 		case RESERVED_WORD_LABEL_NAME:
-			printf("Illegal label name in line %d.",line_number);
+			printf("\nIllegal label name in line %d.\n",line_number);
 			break;
 		case ILLEGAL_DATA_PARAMETER:
 			printf("\nIllegal data directive parameters in line %d.\n",line_number);

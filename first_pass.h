@@ -11,7 +11,7 @@ void data_directive_handler(char*);
 void string_directive_handler(char*);
 void struct_directive_handler(char*);
 
-char* before_data_param(char* params);
-char* after_data_param(char* params);
 
 void encode_in_data_segment(int value);
+
+void command_handler(int command, char* params);

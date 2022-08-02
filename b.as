@@ -11,7 +11,7 @@ LOOP:   jmp R
 		prn K
 		inc r7
 		endmacro
-		jsr S.2
+r1:		jsr S.2
 		red W
 		m1
 X:		.data 2

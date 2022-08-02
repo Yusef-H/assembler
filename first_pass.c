@@ -108,17 +108,17 @@ void parse_line(char* line, label_ptr* label_table){
 		}
 		
 	}
-/*	else if((cmd = is_command(word))){*/
-/*		if(label_flag == ON){*/
-			/*
-			label_item = add_label();
-			label_item->is_instruction = TRUE;
+	else if((cmd = is_command(word))){
+		if(label_flag == ON){
+			
+			label_item->code_flag = ON;
 			label_item->address = IC;
-			 */
-/*		}*/
+			
+		}
 		/* deal with command name (handler).
 		   find L while parsing instructions and set IC = L + IC */
-/*	}*/
+		command_handler(cmd, next_word_start);
+	}
 /*	*/
 /*	else{*/
 		/* error show */
@@ -151,6 +151,8 @@ int is_label(char* word, char* label_name){
 		/* check for reserved word */
 		if(is_reserved_word(label_name)){
 			error_type = RESERVED_WORD_LABEL_NAME;
+			throw_error();
+			return FALSE;
 		}
 		return TRUE;
 	}
@@ -405,15 +407,54 @@ void struct_directive_handler(char* params){
 	string_directive_handler(params);
 }
 
-
-
-		
-	
-
-
-
 void encode_in_data_segment(int value){
 	data_segment[DC++] = (unsigned int)value;
+}
+
+
+void command_handler(int command, char* params){
+	/* check MAX_LENGTH (maybe change to something smaller). */
+	char* first_operand = (char*)malloc(sizeof(char)*MAX_LENGTH);
+	char* second_operand = (char*)malloc(sizeof(char)*MAX_LENGTH);
+	int first_address_method = NONE, second_address_method = NONE;
+	if(!first_operand || !second_operand){
+		printf("memory allocation failed");
+		exit(1);
+	}
+	char* next_word_start;
+	
+	next_word_start = next_word(params, first_operand);
+	/* first op exists in instruction line */
+	if(strlen(first_operand) > 0){
+	
+/*		first_address_method = address_method_detector();*/
+
+		next_word_start = next_word(next_word_start, second_operand);
+		if(second_operand != ','){
+			/* ERRORRRRRRR */
+		}
+		else{
+			next_word_start = next_word(next_word_start, second_operand);
+			
+/*			second_adress_method = address_method_detector();*/
+
+			/* CHECK AFTER SECOND OPERAND FOR ERRORS */			
+		}
+		
+	}
+	
+	
+	/* IF ADDRESS METHODS ARE AVAILABLE FOR THIS COMMAND 
+	        IF number of operands suits the command..
+	       	 	encode to instruction ds
+	        ELSE
+	       		error
+	   ELSE
+	   		error
+	 */
+	 
+	
+	
 }
 
 
