@@ -74,7 +74,11 @@ void parse_line(char* line, label_ptr* label_table){
 	
 	next_word_start = get_word(line, word);
 	if(is_label(word, label_name)){
+	
+	
+	/*** HERE  *************************** ***/
 		if(error_type != NO_ERROR){
+			throw_error();
 			return;
 		}
 
@@ -115,13 +119,14 @@ void parse_line(char* line, label_ptr* label_table){
 			label_item->address = IC;
 			
 		}
+		IC++;
 		/* deal with command name (handler).
 		   find L while parsing instructions and set IC = L + IC */
 		command_handler(cmd, next_word_start);
 	}
 /*	*/
 /*	else{*/
-		/* error show */
+/*		 error show */
 /*	}*/
 	
 }
@@ -129,34 +134,37 @@ void parse_line(char* line, label_ptr* label_table){
 int is_label(char* word, char* label_name){
 	/* IF TOO LONG ILLEGAL LABEL ERROR*/
 	
-	char* temp = word;
-	char* temp2 = label_name;
-	
-	/* label must start with an alphabetical character */
-	if(!isalpha(*word)){
+	char* label_no_colon = (char*)malloc(sizeof(char)*MAX_LABEL_LENGTH+1);
+	int length = strlen(word);
+	int i = 0;
+	if(!label_no_colon){
+		printf("memory allocation failed");
+		exit(1);
+	}
+	while(i < length && word[i] != ':'){
+		label_no_colon[i] = word[i];
+		i++;
+	}
+	label_no_colon[i] = '\0';
+	if(!is_label_op(label_no_colon)){
 		return FALSE;
 	}
+		
+		
+	/* its a label name, but is there a colon? */
+	if(word[length - 1] != ':'){
+
+		error_type = LABEL_COLON;
+		throw_error();
+		return FALSE;
+	}
+	while(*word != '\0'){
+		*label_name++ = *word++;
+	}
+	*label_name = '\0';
+	return TRUE;
 	
-	while(isalnum(*temp)){
-		temp++;
-	}
-	if(*temp == ':'){
-		temp = word;
-		while((*temp) != ':'){
-			*temp2 = *temp;
-			temp2++;
-			temp++;
-		}
-		*temp2 = '\0';
-		/* check for reserved word */
-		if(is_reserved_word(label_name)){
-			error_type = RESERVED_WORD_LABEL_NAME;
-			throw_error();
-			return FALSE;
-		}
-		return TRUE;
-	}
-	return FALSE;
+	
 	
 }
 
@@ -417,24 +425,27 @@ void command_handler(int command, char* params){
 	char* first_operand = (char*)malloc(sizeof(char)*MAX_LENGTH);
 	char* second_operand = (char*)malloc(sizeof(char)*MAX_LENGTH);
 	int first_address_method = NONE, second_address_method = NONE;
+	char* next_word_start;
 	if(!first_operand || !second_operand){
 		printf("memory allocation failed");
 		exit(1);
 	}
-	char* next_word_start;
 	
-	next_word_start = next_word(params, first_operand);
+	next_word_start = get_word(params, first_operand);
 	/* first op exists in instruction line */
 	if(strlen(first_operand) > 0){
 	
-/*		first_address_method = address_method_detector();*/
+		first_address_method = address_method_detector(first_operand);
+		if(first_address_method != NONE){
+			IC = IC + method_extra_words(first_address_method);
+		}
 
-		next_word_start = next_word(next_word_start, second_operand);
-		if(second_operand != ','){
+		next_word_start = get_word(next_word_start, second_operand);
+		if(*second_operand != ','){
 			/* ERRORRRRRRR */
 		}
 		else{
-			next_word_start = next_word(next_word_start, second_operand);
+			next_word_start = get_word(next_word_start, second_operand);
 			
 /*			second_adress_method = address_method_detector();*/
 
@@ -454,6 +465,114 @@ void command_handler(int command, char* params){
 	 */
 	 
 	
+	
+}
+
+/* This method gets an operand and returns the number of the addressing
+   method. */
+int address_method_detector(char* op){	
+	
+	/* instant addressing - example: #7, #-5... */
+	if(*op == '#'){
+		op++;
+		/* number check */
+		if(*op == '+' || *op == '-'){
+			op++;
+			if(!(isdigit(*op))){
+				error_type = INVALID_OPERAND;
+				throw_error();
+				return NONE;
+			}
+		}
+		while(*op != '\n' && *op != EOF && *op != '\0'){
+			if(!(isdigit(*op))){
+				op++;
+				error_type = INVALID_OPERAND;
+				throw_error();
+				return NONE;
+			}
+			op++;
+		}
+		return INSTANT_ADDRESSING;
+	}
+	
+	/* direct addressing */	
+	else if(is_label_op(op)){
+		return DIRECT_ADDRESSING;
+	}
+	
+	/* struct addressing */
+	else if(is_struct_op(op)){
+		return STRUCT_ADDRESSING;	
+	}
+
+	/* register addressing */
+	else if(is_register(op)){
+		return REGISTER_ADDRESSING;
+	}
+	
+	return NONE;
+}
+
+int method_extra_words(int method){
+	if(method == STRUCT_ADDRESSING)
+		return 2;
+	/* direct or instant or register addressing */	
+	return 1;
+}
+
+int is_label_op(char* operand){
+	int length = strlen(operand);
+	int i;
+	if(is_reserved_word(operand)){
+		return FALSE;
+	}
+	if(!isalpha(*operand)){
+		return FALSE;
+	}
+	if(length > MAX_LABEL_LENGTH){
+		return FALSE;
+	}
+	for(i = 0; i<length; i++){
+		if(!(isalnum(operand[i]))){
+			return FALSE;
+		}
+	}
+	return TRUE;
+}
+
+int is_struct_op(char* operand){
+	/* These will hold label before . and number after
+	   Example: S.2 -> label = "s", number = "." */
+	char* label = (char*)malloc(sizeof(char)*MAX_LABEL_LENGTH);
+	int length = strlen(operand);
+	int i = 0;
+	if(!label){
+		printf("Memory allocation failed");
+		exit(1);
+	}
+	/* take the label name */
+	while(i < length && operand[i] != '.'){
+		label[i] = operand[i];
+		i++;
+	}
+	label[i] = '\0';
+
+	/* if theres no dot then its not a struct */
+	if(operand[i] != '.')
+		return FALSE;
+	
+	/* if its not a label */
+	if(!is_label_op(label))
+		return FALSE;
+	/* skip the dot */
+	i++;
+	
+	/* struct has two fields only */
+	if(operand[i] != '1' && operand[i] != '2')
+		return FALSE;
+	
+	return TRUE;
 	
 }
 

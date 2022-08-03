@@ -11,14 +11,13 @@ LOOP:   jmp R
 		prn K
 		inc r7
 		endmacro
-r1:		jsr S.2
-		red W
+		jsr S.2
+T		red W
 		m1
 X:		.data 2
 		macro s8
 		jmp s8
 		jmp s8
-		hello
 		endmacro
 		s8
 		s8

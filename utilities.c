@@ -45,6 +45,13 @@ void throw_error(){
 		case MISSING_FIELDS:
 			printf("\nMissing struct fields in line %d.\n",line_number);
 			break;
+		case INVALID_OPERAND:
+			printf("\nInvalid operand in line %d.\n", line_number);
+			break;
+		case LABEL_COLON:
+			printf("\nMissing label colon in line %d.\n",line_number);
+			break;
+	
 	}
 	error_type = NO_ERROR;
 	return;
@@ -117,10 +124,8 @@ int is_reserved_word(char* word){
 			return TRUE;
 		}
 	}
-	for(i = 0; i < NUM_REGISTERS; i++){
-		if(!strcmp(registers[i],word)){
-			return TRUE;
-		}
+	if(is_register(word)){
+		return TRUE;
 	}
 	for(i = 0; i < NUM_COMMANDS; i++){
 		if(!strcmp(commands[i], word)){
@@ -146,6 +151,16 @@ char* skip_line(char* line){
 
 int is_end_of_line(char c){
 	return (c == '\n' || c == EOF);
+}
+
+int is_register(char* operand){
+	int i;
+	for(i = 0; i < NUM_REGISTERS; i++){
+		if(!strcmp(registers[i],operand)){
+			return TRUE;
+		}
+	}
+	return FALSE;
 }
 
 

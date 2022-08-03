@@ -17,3 +17,5 @@ char* skip_whitespaces(char* );
 char* skip_line(char*);
 
 int is_end_of_line(char c);
+
+int is_register(char*);
