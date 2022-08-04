@@ -12,7 +12,7 @@ LOOP:   jmp R
 		inc r7
 		endmacro
 		jsr S.2
-T		red W
+		prn W
 		m1
 X:		.data 2
 		macro s8

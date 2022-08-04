@@ -131,8 +131,9 @@ void parse_line(char* line, label_ptr* label_table){
 	
 }
 
+
 int is_label(char* word, char* label_name){
-	/* IF TOO LONG ILLEGAL LABEL ERROR*/
+
 	
 	char* label_no_colon = (char*)malloc(sizeof(char)*MAX_LABEL_LENGTH+1);
 	int length = strlen(word);
@@ -441,15 +442,43 @@ void command_handler(int command, char* params){
 		}
 
 		next_word_start = get_word(next_word_start, second_operand);
-		if(*second_operand != ','){
-			/* ERRORRRRRRR */
+
+		if(*second_operand != '\n' && *second_operand != '\0'){	
+			if(*second_operand != ','){
+				error_type = MISSING_COMMA;
+				throw_error();
+				return;
+			}
+			else{
+				next_word_start = get_word(next_word_start, second_operand);
+				if(strlen(second_operand) == 0){
+					error_type = MISSING_OPERAND;
+					throw_error();
+					return;
+				}
+				second_address_method = address_method_detector(second_operand);
+				if(second_address_method != NONE){
+					if(first_address_method == REGISTER_ADDRESSING &&
+					   second_address_method == REGISTER_ADDRESSING){
+					   		/* nothing IC doesnt change here (2 registers) */
+					   }
+					else{
+						IC = IC + method_extra_words(second_address_method);
+					}
+				}
+				
+				next_word_start = get_word(next_word_start, second_operand);
+				if(strlen(second_operand) > 0){
+					error_type = EXTRA_TEXT_AFTER_OPERAND;
+					throw_error();
+					return;
+				}
+
+				/* CHECK AFTER SECOND OPERAND FOR ERRORS */			
+			}
 		}
 		else{
-			next_word_start = get_word(next_word_start, second_operand);
 			
-/*			second_adress_method = address_method_detector();*/
-
-			/* CHECK AFTER SECOND OPERAND FOR ERRORS */			
 		}
 		
 	}

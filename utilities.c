@@ -51,6 +51,10 @@ void throw_error(){
 		case LABEL_COLON:
 			printf("\nMissing label colon in line %d.\n",line_number);
 			break;
+		case MISSING_OPERAND:
+			printf("\nMissing operand in line %d.\n",line_number);
+		case EXTRA_TEXT_AFTER_OPERAND:
+			printf("\nExtra space after second operand in line %d.\n",line_number);
 	
 	}
 	error_type = NO_ERROR;
