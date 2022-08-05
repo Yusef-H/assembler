@@ -34,7 +34,7 @@ void first_pass(FILE* fp_am){
 	
 	while(fgets(line, MAX_LENGTH, fp_am)){
 		/* ignore if empty line */
-		if(*line == '\n')
+		if(*line == '\n' || *line == ';')
 			continue;
 		parse_line(line, &label_table);
 		if(error_type != NO_ERROR){
@@ -96,8 +96,10 @@ void parse_line(char* line, label_ptr* label_table){
 	
 	if((directive = is_directive(word))){
 		if(label_flag == ON){
+			/* label that appears before extern or entern directive
+			   has no purpose so we delete it. */
 			if(directive == ENTRY || directive == EXTERN){
-/*				 delete label item from label table   */
+				delete_label(label_table, &label_item);
 			}
 			else{
 				label_item->address = DC;
@@ -106,10 +108,11 @@ void parse_line(char* line, label_ptr* label_table){
 		/*
 		deal with all directives depending on directive type (switch) dc 
 		*/	
-			directive_handler(directive, next_word_start);
+			
 		
 		
 		}
+		directive_handler(directive, next_word_start, label_table);
 		
 	}
 	else if((cmd = is_command(word))){
@@ -233,7 +236,7 @@ int is_command(char* word){
 		return NOT_CMD;
 }
 
-void directive_handler(int directive, char* params){
+void directive_handler(int directive, char* params, label_ptr* label_table){
 	switch(directive){
 		case DATA:
 			data_directive_handler(params);
@@ -244,11 +247,58 @@ void directive_handler(int directive, char* params){
 		case STRUCT:
 			struct_directive_handler(params);
 			break;
-		/* ext ent */
+		case ENTRY:
+			entry_directive_handler(params);
+			break;
+		case EXTERN:
+			/* Syntax check */
+			extern_directive_handler(params, label_table);
+			break;
 	
 	}
 	return;
 }
+
+void entry_directive_handler(char* params){
+	/* Here we check if the syntax has no errors, in the second pass
+	   we check if the label exists (been defined in the file). */
+	char* label_name = (char*)malloc(sizeof(char)*MAX_LABEL_LENGTH);
+	if(!label_name){
+		printf("Memory allocation failed.");
+		exit(1);
+	}
+	params = get_word(params, label_name);
+	
+	if(strlen(label_name) == 0){
+		error_type = MISSING_LABEL;
+		return;
+	}
+	if(!is_label_op(label_name)){
+		error_type = INVALID_LABEL;
+		return;
+	}
+	params = get_word(params, label_name);
+	if(strlen(label_name) > 0){
+		error_type = EXTRA_TEXT_AFTER_OPERAND;
+		return;
+	}
+}
+
+
+
+void extern_directive_handler(char* params, label_ptr* label_table){
+	label_ptr extern_label_ptr ;
+	char* label_name = (char*)malloc(sizeof(char)*MAX_LABEL_LENGTH);
+	/* Syntax check is the same as entry directive */
+	entry_directive_handler(params);
+	/* if there was an error return */
+	if(error_type != NO_ERROR)
+		return;
+	params = get_word(params, label_name);
+	extern_label_ptr = add_label(label_table, label_name);
+	extern_label_ptr -> ext_flag = ON;
+}
+
 /*
 	Data Directive Handler function.
 	Encodes the data directives in the data segment while carefully checking

@@ -54,7 +54,14 @@ void throw_error(){
 		case MISSING_OPERAND:
 			printf("\nMissing operand in line %d.\n",line_number);
 		case EXTRA_TEXT_AFTER_OPERAND:
-			printf("\nExtra space after second operand in line %d.\n",line_number);
+			printf("\nExtra text after second operand in line %d.\n",line_number);
+			break;
+		case MISSING_LABEL:
+			printf("\nMissing label name in line %d.\n",line_number);
+			break;
+		case INVALID_LABEL:
+			printf("\nInvalid label name in line %d.\n",line_number);
+			break;
 	
 	}
 	error_type = NO_ERROR;

@@ -86,7 +86,7 @@ void add_macro_line(item_ptr *macro, char* macro_line){
 	}
 }
 
-/* Checks if a name (string) exists in the table */
+/* Checks if a name (string) exists in the macro table */
 item_ptr does_macro_exist(item_ptr macro_head, char* name){
 	while(macro_head != NULL){
 /*		printf("Macro item name: %s",macro_head->name);*/
@@ -203,7 +203,7 @@ void delete_label(label_ptr* head, label_ptr* label){
 
 void print_labels(label_ptr head){
 	while(head){
-		printf("%s, %d, %d->",head->label_name, head->address, head->code_flag);
+		printf("%s, add:%d, code:%d, ext:%d->",head->label_name, head->address, head->code_flag, head->ext_flag);
 		head = head -> next;
 	}
 	printf(";;");

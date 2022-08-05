@@ -9,10 +9,13 @@ int is_command(char*);
 int is_label_op(char*);
 int is_struct_op(char*);
 
-void directive_handler(int, char*);
+void directive_handler(int, char*, label_ptr*);
 void data_directive_handler(char*);
 void string_directive_handler(char*);
 void struct_directive_handler(char*);
+void entry_directive_handler(char*);
+void extern_directive_handler(char*, label_ptr*);
+
 
 
 void encode_in_data_segment(int value);
