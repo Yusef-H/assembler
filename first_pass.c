@@ -293,7 +293,7 @@ void extern_directive_handler(char* params, label_ptr* label_table){
 	entry_directive_handler(params);
 	/* if there was an error return */
 	if(error_type != NO_ERROR)
-		return;
+		return; 
 	params = get_word(params, label_name);
 	extern_label_ptr = add_label(label_table, label_name);
 	extern_label_ptr -> ext_flag = ON;
