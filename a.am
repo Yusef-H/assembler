@@ -16,4 +16,4 @@ K: 		.data 16
 S: 		.struct 2,"ab"
 		cmp #-6,r1
 		not K
-		
+B:	

@@ -20,4 +20,4 @@ K: 		.data 16
 		m1
 S: 		.struct 2,"ab"
 		m6
-		
+B:	

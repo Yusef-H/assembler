@@ -8,6 +8,7 @@
 #include "utilities.h"
 #include "first_pass.h"
 
+
 extern int error_type;
 extern unsigned int data_segment[SIZE];
 extern unsigned int code_segment[SIZE];
@@ -21,31 +22,45 @@ int line_number;
 	- Add all labels to the symbol table.
 	- encode the data instructions (.data 1,2,3) to the data segment).
 	- Check for possible errors and output them.
+	
+	This file makes use of 2 other more specific files which are
+	- first_pass_directives.c: Has all of the different directives 
+							   specific methods.
+	- first_pass_instructions.c: Has all of the different instructions
+								 (commands) specific methods.
 */
 
-
+/* 
+  The first pass function
+  Gets file as input (after pre assembling), parses the file's lines, then
+  updates DC. And the function looks for all kinds of errors in the assembly
+  file and outputs them.
+*/
 void first_pass(FILE* fp_am){
 	int i;
 	char* line = (char*)malloc(sizeof(char)*MAX_LENGTH);
+	/* Initializing an empty label table */
 	label_ptr label_table = NULL;
+	
 	line_number = 1;
 	
 	
-	
 	while(fgets(line, MAX_LENGTH, fp_am)){
-		/* ignore if empty line */
+		/* ignore if empty line or comment */
 		if(*line == '\n' || *line == ';')
 			continue;
+		/* Send to parse_line function to analyze it. */
 		parse_line(line, &label_table);
+		
+		/* if there was any error in the line we output it from here. */
 		if(error_type != NO_ERROR){
 			throw_error();
-		}
-		 
+		} 
 		line_number++;	
-	
 	}
-	
 	free(line);
+	
+	
 	print_labels(label_table);
 	printf("\n\n");
 	for(i=0; i<DC; i++){
@@ -57,35 +72,42 @@ void first_pass(FILE* fp_am){
 	 */
 }
 
-
+/* 
+   This function gets a line from the file and labels table that is used
+   to store the symbols.
+   The function parses the line and looks for errors and outputs them and
+   handles multiple type of lines (instruction,data). 
+*/
 void parse_line(char* line, label_ptr* label_table){
-	/* Reading and parsing */
+	/* this variable will hold each word in line in order to analyze it. */
 	char* word = (char*)malloc(sizeof(char)*MAX_LENGTH);
+	
+	/* This pointer will point on the next character after we get a word
+	   from the line (so we could continue to get next word). */
 	char* next_word_start = line;
 	
-	int label_flag = OFF;
-	
-	int directive,cmd,label;
-	
-	/* Initialize empty label table */
+	/* label pointer to point at the last label added to label table. */
 	label_ptr label_item;
 	char* label_name = (char*)malloc(sizeof(char)*MAX_LENGTH);
+	int label_flag = OFF;
 	
+	/* will hold what type of directive/command we got. */
+	int directive,cmd;
 	
+	/* Get first word in line which could be: Label/command/directive. */
 	next_word_start = get_word(line, word);
-	/* empty line */
+	
+	/* if the line contains only whitespaces then we return and move
+	   to next line. */
 	if(strlen(word) == 0)
 		return;
+		
+	/* If it's a label */
 	if(is_label(word, label_name)){
-	
-	
-	/*** HERE  *************************** ***/
-		if(error_type != NO_ERROR){
-			throw_error();
-			return;
-		}
-
 		label_flag = ON;
+		/* add the label to labels table. and keep holding the new added
+		   label so we can update the label address/flags... while 
+		   analyzing the line. */
 		label_item = add_label(label_table, label_name);
 		
 		/* Getting next word in line */
@@ -95,7 +117,7 @@ void parse_line(char* line, label_ptr* label_table){
 	}
 	
 	/* Next word must be a start of instruction line (command) or
-	                     a start of directive line.  */
+	   a start of directive line.  */
 	
 	if((directive = is_directive(word))){
 		if(label_flag == ON){
@@ -107,139 +129,29 @@ void parse_line(char* line, label_ptr* label_table){
 			else{
 				label_item->address = DC;
 			}
-			
-		/*
-		deal with all directives depending on directive type (switch) dc 
-		*/	
-			
-		
-		
 		}
+		/* Handle the directive according to which directive it is. */
 		directive_handler(directive, next_word_start, label_table);
-		
 	}
+	
 	else if((cmd = is_command(word))){
 		if(label_flag == ON){
-			
+			/* flag that the label is in code segment */
 			label_item->code_flag = ON;
 			label_item->address = IC;
-			
 		}
 		IC++;
-		/* deal with command name (handler).
-		   find L while parsing instructions and set IC = L + IC */
+		/* handle the command according to which command type it is. */
 		command_handler(cmd, next_word_start);
 	}
 	
 	else{
 		error_type = INVALID_SYNTAX;
 		return;
-	}
-	
+	}	
 }
 
-
-int is_label(char* word, char* label_name){
-
-	
-	char* label_no_colon = (char*)malloc(sizeof(char)*MAX_LABEL_LENGTH+1);
-	int length = strlen(word);
-	int i = 0;
-	if(!label_no_colon){
-		printf("memory allocation failed");
-		exit(1);
-	}
-	while(i < length && word[i] != ':'){
-		label_no_colon[i] = word[i];
-		i++;
-	}
-	label_no_colon[i] = '\0';
-	if(!is_label_op(label_no_colon)){
-		return FALSE;
-	}
-		
-		
-	/* its a label name, but is there a colon? */
-	if(word[length - 1] != ':'){
-
-		error_type = LABEL_COLON;
-		throw_error();
-		return FALSE;
-	}
-	while(*word != '\0'){
-		*label_name++ = *word++;
-	}
-	*label_name = '\0';
-	return TRUE;
-	
-	
-	
-}
-
-/* checks if a string is a valid directive and returns an int representing
-   the directive so we can handle it and its parameters. */
-int is_directive(char* word){
-	if(*word != '.'){
-		return NOT_DIRECTIVE;
-	}
-	if(!strcmp(word,".entry")){
-		return ENTRY;
-	}
-	else if(!strcmp(word,".extern")){
-		return EXTERN;
-	}
-	else if(!strcmp(word,".data")){
-		return DATA;
-	}
-	else if(!strcmp(word,".string")){
-		return STRING;
-	}
-	else if(!strcmp(word,".struct")){
-		return STRUCT;
-	}
-	
-	return NOT_DIRECTIVE;
-
-}
-
-/* Checks if a string is a command and returns an int representing it. */
-int is_command(char* word){
-	if(!strcmp(word,"mov"))
-		return MOV;
-	else if(!strcmp(word,"cmp"))
-		return CMP;
-	else if(!strcmp(word,"add"))
-		return ADD;
-	else if(!strcmp(word,"sub"))
-		return SUB;
-	else if(!strcmp(word,"not"))
-		return NOT;
-	else if(!strcmp(word,"clr"))
-		return CLR;	
-	else if(!strcmp(word,"lea"))
-		return LEA;	
-	else if(!strcmp(word,"inc"))
-		return INC;	
-	else if(!strcmp(word,"dec"))
-		return DEC;	
-	else if(!strcmp(word,"jmp"))
-		return JMP;	
-	else if(!strcmp(word,"bne"))
-		return BNE;	
-	else if(!strcmp(word,"get"))
-		return GET;	
-	else if(!strcmp(word,"prn"))
-		return PRN;	
-	else if(!strcmp(word,"jsr"))
-		return JSR;	
-	else if(!strcmp(word,"rts"))
-		return RTS;	
-	else if(!strcmp(word,"hlt"))
-		return HLT;	
-	else
-		return NOT_CMD;
-}
-
+/* This function calls the function that handles the directive type we have. */
 void directive_handler(int directive, char* params, label_ptr* label_table){
 	switch(directive){
 		case DATA:
@@ -255,233 +167,24 @@ void directive_handler(int directive, char* params, label_ptr* label_table){
 			entry_directive_handler(params);
 			break;
 		case EXTERN:
+			/* Send the labels table so we can add the extern label to it. */
 			extern_directive_handler(params, label_table);
 			break;
-	
 	}
 	return;
 }
 
-void entry_directive_handler(char* params){
-	/* Here we check if the syntax has no errors, in the second pass
-	   we check if the label exists (been defined in the file). */
-	char* label_name = (char*)malloc(sizeof(char)*MAX_LABEL_LENGTH);
-	if(!label_name){
-		printf("Memory allocation failed.");
-		exit(1);
-	}
-	params = get_word(params, label_name);
-	
-	if(strlen(label_name) == 0){
-		error_type = MISSING_LABEL;
-		return;
-	}
-	if(!is_label_op(label_name)){
-		error_type = INVALID_LABEL;
-		return;
-	}
-	params = get_word(params, label_name);
-	if(strlen(label_name) > 0){
-		error_type = EXTRA_TEXT_AFTER_OPERAND;
-		return;
-	}
-}
-
-
-
-void extern_directive_handler(char* params, label_ptr* label_table){
-	label_ptr extern_label_ptr ;
-	char* label_name = (char*)malloc(sizeof(char)*MAX_LABEL_LENGTH);
-	/* Syntax check is the same as entry directive */
-	entry_directive_handler(params);
-	/* if there was an error return */
-	if(error_type != NO_ERROR)
-		return; 
-	params = get_word(params, label_name);
-	extern_label_ptr = add_label(label_table, label_name);
-	extern_label_ptr -> ext_flag = ON;
-}
-
-/*
-	Data Directive Handler function.
-	Encodes the data directives in the data segment while carefully checking
-	for errors.
-*/
-void data_directive_handler(char* params){
-	char* temp_params = params; /* Will point to the next parameter */
-	char* number; /* holds number parameter to encode them using atoi*/
-	char* temp_num; /* pointer to the number parameter */
-	char next_char; /* holds next char after reading a number parameter */
-	int got_num_flag; /* flag that gets turned on when we get a number */
-	
-	while(*temp_params != '\n' && *temp_params != '\0' && *temp_params != EOF){
-		got_num_flag = OFF; /* initialize flag */
-		
-		/* new number parameter */
-		number = (char*)malloc(sizeof(char)*MAX_LENGTH); 
-		if(!number){
-			printf("Memory allocation failed.");
-			exit(1);
-		}
-		
-		/* skip whitespaces */
-		temp_params = skip_whitespaces(temp_params);
-		
-		/* point temp_num at number memory start to start copying */
-		temp_num = number;
-
-		/* Error checks for data parameters*/
-		
-
-		if(!(isdigit(*temp_params))){ /* if not a number */
-			
-			/* if its none of these chars then its illegal */
-			if(*temp_params != '+' && *temp_params != '-' &&
-			   *temp_params != '\n' && *temp_params != '\0' &&
-			   *temp_params != ','){
-
-			   	temp_params++;
-				error_type = ILLEGAL_DATA_PARAMETER;
-				throw_error();
-				return;
-			}
-			
-			/* handle comma and its errors */
-			if(*temp_params == ','){
-				temp_params++;
-				temp_params = skip_whitespaces(temp_params);
-				/* after comma its either new line or a parameter */
-				if(*temp_params == '\n'){
-					error_type = ILLEGAL_COMMA;
-					throw_error();
-					temp_params++;
-					return;
-				}
-				/* illegal extra comma */
-				if(*temp_params == ','){
-					error_type = ILLEGAL_COMMA;
-					throw_error();
-					temp_params++;
-					return;
-				}
-
-			}
-			/* handle + and - */
-			if(*temp_params == '+' || *temp_params == '-'){
-				*temp_num++ = *temp_params++;
-				/* Must be a digit after + or - */
-				if(!isdigit(*temp_params)){
-					error_type = NO_NUMBER_AFTER_SIGN;
-					throw_error();
-					return;
-				}
-			}
-		}
-		skip_whitespaces(temp_params);
-		while(isdigit(*temp_params)){
-			got_num_flag = ON;
-			*temp_num++ = *temp_params++;
-		}
-		temp_num = '\0';
-		/* next non whitespace char after a number can be either a comma
-		   or a new line character if end of line or eof if end of file */
-		next_char = *(skip_whitespaces(temp_params));
-		if(isdigit(next_char) && got_num_flag){
-			error_type = MISSING_COMMA;
-			throw_error();
-			return;
-		}
-		if(next_char != ',' && next_char != '\n' && next_char != EOF){
-			error_type = ILLEGAL_DATA_PARAMETER;
-			throw_error();
-			return;
-		}
-		if(got_num_flag)
-			encode_in_data_segment(atoi(number));
-		free(number);
-
-	}
-}
-
-void string_directive_handler(char* string){
-	string = skip_whitespaces(string);
-	if(*string != '"'){
-		error_type = INVALID_STRING;
-		return;
-	}
-	string++;
-	while( !(is_end_of_line(*string)) && *string != '"'){
-		encode_in_data_segment((unsigned int)*string);
-		string++;
-	}
-	if(*string != '"'){
-		error_type = INVALID_STRING;
-		return;
-	}
-	string++;
-	string = skip_whitespaces(string);
-	if(!(is_end_of_line(*string))){
-		error_type = EXTRA_TEXT_AFTER_STRING;
-		return;
-	}
-	encode_in_data_segment('\0'); /* end of legal string */
-}
-
-void struct_directive_handler(char* params){
-	char* number_param = (char*)malloc(sizeof(char)*MAX_LENGTH);
-	char* number_ptr = number_param;
-	if(!number_param){
-		printf("Memory allocation failed");
-		exit(1);
-	}
-	
-	params = skip_whitespaces(params);
-	if(is_end_of_line(*params)){
-		error_type = MISSING_FIELDS;
-		return;
-	}
-	if(*params == '+' || *params == '-')
-		params++;
-	/* get number parameter */
-	while(isdigit(*params)){
-		*number_ptr++ = *params++;
-	}
-	/* must find comma after */
-	params = skip_whitespaces(params);
-	if(*params != ','){
-		error_type = MISSING_COMMA;
-		return;
-	}
-	params++;
-	/* check for illegal comma, missing string parameter */
-	params = skip_whitespaces(params);
-	if(*params == ','){
-		error_type = ILLEGAL_COMMA;
-		return;
-	}
-	if(is_end_of_line(*params)){
-		error_type = MISSING_FIELDS;
-		return;
-	}
-	
-	encode_in_data_segment(atoi(number_param));
-	
-	string_directive_handler(params);
-}
-
-void encode_in_data_segment(int value){
-	data_segment[DC++] = (unsigned int)value;
-}
-
-
+/* This function handles command and validates if */
 void command_handler(int command, char* params){
 	/* check MAX_LENGTH (maybe change to something smaller). */
 	char* first_operand = (char*)malloc(sizeof(char)*MAX_LENGTH);
 	char* second_operand = (char*)malloc(sizeof(char)*MAX_LENGTH);
 	
-	/* flags when we gets first and second operands. */
+	/* flags for first and second operands that turn on when we have them
+	   in line after the command. */
 	int got_first_op=OFF,got_second_op=OFF; 
-	/* variables that will hold the operands addressing methods. */
+	
+	/* variables that will hold the operands addressing methods types. */
 	int first_address_method = NONE, second_address_method = NONE;
 	
 	/* pointer to the next word start in parameters string */
@@ -489,28 +192,30 @@ void command_handler(int command, char* params){
 	
 	if(!first_operand || !second_operand){
 		printf("memory allocation failed");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 	
 	/* Get first operand */
 	next_word_start = get_word(params, first_operand);
+	
 	/* If first operand exists: */
 	if(strlen(first_operand) > 0){
 		got_first_op = ON;
+		/* get address method of first operand */
 		first_address_method = address_method_detector(first_operand);
+		/* Update IC */
 		if(first_address_method != NONE){
 			IC = IC + method_extra_words(first_address_method);
 		}
 		
 		/* get next word into second_operand which should be , if it exists */
 		next_word_start = get_word(next_word_start, second_operand);
-		
+
 		/* if its not empty */
 		if(*second_operand != '\n' && *second_operand != '\0'){	
 			/* if its not a comma then theres an error.*/
 			if(*second_operand != ','){
 				error_type = MISSING_COMMA;
-				throw_error();
 				return;
 			}
 			/* else if its a comma then we get next word which is the 
@@ -520,9 +225,8 @@ void command_handler(int command, char* params){
 				/* empty second operand check after comma. */
 				if(strlen(second_operand) == 0){
 					error_type = MISSING_OPERAND;
-					throw_error();
 					return;
-			}
+				}
 				got_second_op = ON;
 				second_address_method = address_method_detector(second_operand);
 				if(second_address_method != NONE){
@@ -534,238 +238,111 @@ void command_handler(int command, char* params){
 						IC = IC + method_extra_words(second_address_method);
 					}
 				}
-				
 				/* check for extraneous text error after second operand. */
 				next_word_start = get_word(next_word_start, second_operand);
 				if(strlen(second_operand) > 0){
 					error_type = EXTRA_TEXT_AFTER_OPERAND;
-					throw_error();
 					return;
 				}		
 			}
 		}
 		
+		/* validate number of parameters and addressing method types for 
+		   the command type. */
 		if(validate_num_operands(command, got_first_op, got_second_op)){ 
 			if(validate_addressing_methods(command, first_address_method,
-											 second_address_method)){
-				
+											 second_address_method)){	
 				/* build the first word! */
+				
 			}
 			else{
 				error_type = INVALID_ADDRESS_METHOD;
 				return;
 			}   
-			   
-		
 		}
 		else{
 			error_type = INVALID_NUM_OPERANDS;
 			return;
-		}
-		
-		
-	}
-	
-	
+		}	
+	}	
 }
 
-int validate_num_operands(int command,int got_first_op,int got_second_op){
-	switch(command){
-		/* commands that accept 2 operands: */
-		case MOV:
-		case CMP:
-		case ADD:
-		case SUB:
-		case LEA:
-			return got_first_op && got_second_op;
+
+
+
+
+
+
+
+
+
+
+void encode_in_data_segment(int value){
+	data_segment[DC++] = (unsigned int)value;
+}
+
+
+
+
+/* Checks if a word is a label with colon at the end. */
+int is_label(char* word, char* label_name){
+
+	/* This will hold the label name without the colon. */
+	char* label_no_colon = (char*)malloc(sizeof(char)*MAX_LABEL_LENGTH+1);
+	int length = strlen(word);
+	int i = 0;
+	if(!label_no_colon){
+		printf("memory allocation failed");
+		exit(1);
+	}
+	/* get label name without the colon (if there is) . */
+	while(i < length && word[i] != ':'){
+		label_no_colon[i] = word[i];
+		i++;
+	}
+	label_no_colon[i] = '\0';
+	
+	/* check if its a valid label name */
+	if(!is_label_op(label_no_colon)){
+		return FALSE;
+	}
 			
-		/* commands that accept 1 operand */	
-		case NOT:
-		case CLR:
-		case INC:
-		case DEC:
-		case JMP:
-		case BNE:
-		case GET:
-		case PRN:
-		case JSR:
-			return got_first_op && !got_second_op;
-		
-		/* commands that accept no operands: */
-		case RTS:
-		case HLT:
-			return !got_first_op && !got_second_op;
+	/* its a label name, but is there a colon? */
+	if(word[length - 1] != ':'){
+		return FALSE;
 	}
-
-	return FALSE;
-}
-int validate_addressing_methods(int command,int first_address_method,int second_address_method){
-	switch(command){
-		/* all methods supported (number of operands validation done 
-		   in another function)
-		   or commands with no operands so we return true because the only
-		   check we need to do is check number of operands for them. */
-		case CMP:
-		case PRN:
-		case RTS:
-		case HLT:
-			return TRUE;
-		
-		/* commands that accept:
-		   Src: 0,1,2,3
-		   Dest: 1,2,3 */
-		case MOV:
-		case ADD:
-		case SUB:
-		return (first_address_method == INSTANT_ADDRESSING ||
-		       first_address_method == DIRECT_ADDRESSING ||
-		       first_address_method == STRUCT_ADDRESSING ||
-		       first_address_method == REGISTER_ADDRESSING) &&
-		       (second_address_method == DIRECT_ADDRESSING ||
-		       second_address_method == STRUCT_ADDRESSING ||
-		       second_address_method == REGISTER_ADDRESSING);
-		
-		       
-		/* commands that accept: 
-		   Src: doesn't have source operand.
-		   Dest: 1,2,3*/
-		case NOT:
-		case CLR:
-		case INC:
-		case DEC:
-		case JMP:
-		case BNE:
-		case GET:
-		case JSR:
-		return (first_address_method == DIRECT_ADDRESSING ||
-		       first_address_method == STRUCT_ADDRESSING ||
-		       first_address_method == REGISTER_ADDRESSING);
-		
-		/* lea command:
-		   Src: 1,2
-		   Dest: 1,2,3 */
-		case LEA:
-		return (first_address_method == DIRECT_ADDRESSING ||
-		       first_address_method == STRUCT_ADDRESSING) &&
-		       (second_address_method == DIRECT_ADDRESSING ||
-		       second_address_method == STRUCT_ADDRESSING ||
-		       second_address_method == REGISTER_ADDRESSING);
-		
-		
+	/* copy the label name so we can add it to labels table. */
+	while(*word != '\0'){
+		*label_name++ = *word++;
 	}
-	
-	return FALSE;
+	*label_name = '\0';
+	return TRUE;	
 }
 
-
-
-
-/* This method gets an operand and returns the number of the addressing
-   method. */
-int address_method_detector(char* op){	
-	
-	/* instant addressing - example: #7, #-5... */
-	if(*op == '#'){
-		op++;
-		/* number check */
-		if(*op == '+' || *op == '-'){
-			op++;
-			if(!(isdigit(*op))){
-				error_type = INVALID_OPERAND;
-				throw_error();
-				return NONE;
-			}
-		}
-		while(*op != '\n' && *op != EOF && *op != '\0'){
-			if(!(isdigit(*op))){
-				op++;
-				error_type = INVALID_OPERAND;
-				throw_error();
-				return NONE;
-			}
-			op++;
-		}
-		return INSTANT_ADDRESSING;
-	}
-	
-	/* direct addressing */	
-	else if(is_label_op(op)){
-		return DIRECT_ADDRESSING;
-	}
-	
-	/* struct addressing */
-	else if(is_struct_op(op)){
-		return STRUCT_ADDRESSING;	
-	}
-
-	/* register addressing */
-	else if(is_register(op)){
-		return REGISTER_ADDRESSING;
-	}
-	
-	return NONE;
-}
-
-int method_extra_words(int method){
-	if(method == STRUCT_ADDRESSING)
-		return 2;
-	/* direct or instant or register addressing */	
-	return 1;
-}
-
-int is_label_op(char* operand){
-	int length = strlen(operand);
+/* This function checks if the word is a label operand 
+   (label without a colon). */
+int is_label_op(char* word){
+	int length = strlen(word);
 	int i;
-	if(is_reserved_word(operand)){
+	/* reserved word check. */
+	if(is_reserved_word(word)){
 		return FALSE;
 	}
-	if(!isalpha(*operand)){
+	/* label must start with alphabetical character. */
+	if(!isalpha(*word)){
 		return FALSE;
 	}
+	/* max label length check. */
 	if(length > MAX_LABEL_LENGTH){
 		return FALSE;
 	}
+	/* labels alphanumeric characters check. */
 	for(i = 0; i<length; i++){
-		if(!(isalnum(operand[i]))){
+		if(!(isalnum(word[i]))){
 			return FALSE;
 		}
 	}
 	return TRUE;
-}
-
-int is_struct_op(char* operand){
-	/* These will hold label before . and number after
-	   Example: S.2 -> label = "s", number = "." */
-	char* label = (char*)malloc(sizeof(char)*MAX_LABEL_LENGTH);
-	int length = strlen(operand);
-	int i = 0;
-	if(!label){
-		printf("Memory allocation failed");
-		exit(1);
-	}
-	/* take the label name */
-	while(i < length && operand[i] != '.'){
-		label[i] = operand[i];
-		i++;
-	}
-	label[i] = '\0';
-
-	/* if theres no dot then its not a struct */
-	if(operand[i] != '.')
-		return FALSE;
-	
-	/* if its not a label */
-	if(!is_label_op(label))
-		return FALSE;
-	/* skip the dot */
-	i++;
-	
-	/* struct has two fields only */
-	if(operand[i] != '1' && operand[i] != '2')
-		return FALSE;
-	
-	return TRUE;
-	
 }
 
 

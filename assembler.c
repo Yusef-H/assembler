@@ -68,7 +68,6 @@ int main(int argc, char *argv[]){
 	char* appended_filename_as;
 	char* appended_filename_am;
 	int i;
-	char* line = (char*)malloc(sizeof(char)*MAX_LENGTH);
 	
 	for(i = 1; i<argc; i++){
 		appended_filename_as = append_filename(argv[i], AS); 

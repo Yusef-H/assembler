@@ -12,6 +12,7 @@
 #define NUM_COMMANDS 16
 #define NUM_REGISTERS 8
 
+
 /* file types */
 enum file_types{AS, AM, OB, EXT, ENT};
 
@@ -46,6 +47,7 @@ enum command_types{NOT_CMD, MOV, CMP, ADD, SUB, NOT, CLR, LEA, INC, DEC,
 
 /* unique values */
 #define NONE -1
+#define EXIT_FAILURE 1
 
 
 #endif

@@ -53,6 +53,7 @@ void throw_error(){
 			break;
 		case MISSING_OPERAND:
 			printf("\nMissing operand in line %d.\n",line_number);
+			break;
 		case EXTRA_TEXT_AFTER_OPERAND:
 			printf("\nExtra text after second operand in line %d.\n",line_number);
 			break;
@@ -70,6 +71,7 @@ void throw_error(){
 			break;
 		case INVALID_NUM_OPERANDS:
 			printf("\nInvalid number of operands for command in line %d.\n", line_number);
+			break;
 	
 	}
 	error_type = NO_ERROR;
