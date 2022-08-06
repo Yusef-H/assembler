@@ -73,6 +73,9 @@ void parse_line(char* line, label_ptr* label_table){
 	
 	
 	next_word_start = get_word(line, word);
+	/* empty line */
+	if(strlen(word) == 0)
+		return;
 	if(is_label(word, label_name)){
 	
 	
@@ -127,10 +130,11 @@ void parse_line(char* line, label_ptr* label_table){
 		   find L while parsing instructions and set IC = L + IC */
 		command_handler(cmd, next_word_start);
 	}
-/*	*/
-/*	else{*/
-/*		 error show */
-/*	}*/
+	
+	else{
+		error_type = INVALID_SYNTAX;
+		return;
+	}
 	
 }
 
@@ -251,7 +255,6 @@ void directive_handler(int directive, char* params, label_ptr* label_table){
 			entry_directive_handler(params);
 			break;
 		case EXTERN:
-			/* Syntax check */
 			extern_directive_handler(params, label_table);
 			break;
 	
@@ -475,77 +478,187 @@ void command_handler(int command, char* params){
 	/* check MAX_LENGTH (maybe change to something smaller). */
 	char* first_operand = (char*)malloc(sizeof(char)*MAX_LENGTH);
 	char* second_operand = (char*)malloc(sizeof(char)*MAX_LENGTH);
+	
+	/* flags when we gets first and second operands. */
+	int got_first_op=OFF,got_second_op=OFF; 
+	/* variables that will hold the operands addressing methods. */
 	int first_address_method = NONE, second_address_method = NONE;
+	
+	/* pointer to the next word start in parameters string */
 	char* next_word_start;
+	
 	if(!first_operand || !second_operand){
 		printf("memory allocation failed");
 		exit(1);
 	}
 	
+	/* Get first operand */
 	next_word_start = get_word(params, first_operand);
-	/* first op exists in instruction line */
+	/* If first operand exists: */
 	if(strlen(first_operand) > 0){
-	
+		got_first_op = ON;
 		first_address_method = address_method_detector(first_operand);
 		if(first_address_method != NONE){
 			IC = IC + method_extra_words(first_address_method);
 		}
-
+		
+		/* get next word into second_operand which should be , if it exists */
 		next_word_start = get_word(next_word_start, second_operand);
-
+		
+		/* if its not empty */
 		if(*second_operand != '\n' && *second_operand != '\0'){	
+			/* if its not a comma then theres an error.*/
 			if(*second_operand != ','){
 				error_type = MISSING_COMMA;
 				throw_error();
 				return;
 			}
+			/* else if its a comma then we get next word which is the 
+			   second operand. */
 			else{
 				next_word_start = get_word(next_word_start, second_operand);
+				/* empty second operand check after comma. */
 				if(strlen(second_operand) == 0){
 					error_type = MISSING_OPERAND;
 					throw_error();
 					return;
-				}
+			}
+				got_second_op = ON;
 				second_address_method = address_method_detector(second_operand);
 				if(second_address_method != NONE){
 					if(first_address_method == REGISTER_ADDRESSING &&
 					   second_address_method == REGISTER_ADDRESSING){
 					   		/* nothing IC doesnt change here (2 registers) */
-					   }
+					}
 					else{
 						IC = IC + method_extra_words(second_address_method);
 					}
 				}
 				
+				/* check for extraneous text error after second operand. */
 				next_word_start = get_word(next_word_start, second_operand);
 				if(strlen(second_operand) > 0){
 					error_type = EXTRA_TEXT_AFTER_OPERAND;
 					throw_error();
 					return;
-				}
-
-				/* CHECK AFTER SECOND OPERAND FOR ERRORS */			
+				}		
 			}
 		}
-		else{
-			
+		
+		if(validate_num_operands(command, got_first_op, got_second_op)){ 
+			if(validate_addressing_methods(command, first_address_method,
+											 second_address_method)){
+				
+				/* build the first word! */
+			}
+			else{
+				error_type = INVALID_ADDRESS_METHOD;
+				return;
+			}   
+			   
+		
 		}
+		else{
+			error_type = INVALID_NUM_OPERANDS;
+			return;
+		}
+		
 		
 	}
 	
 	
-	/* IF ADDRESS METHODS ARE AVAILABLE FOR THIS COMMAND 
-	        IF number of operands suits the command..
-	       	 	encode to instruction ds
-	        ELSE
-	       		error
-	   ELSE
-	   		error
-	 */
-	 
-	
-	
 }
+
+int validate_num_operands(int command,int got_first_op,int got_second_op){
+	switch(command){
+		/* commands that accept 2 operands: */
+		case MOV:
+		case CMP:
+		case ADD:
+		case SUB:
+		case LEA:
+			return got_first_op && got_second_op;
+			
+		/* commands that accept 1 operand */	
+		case NOT:
+		case CLR:
+		case INC:
+		case DEC:
+		case JMP:
+		case BNE:
+		case GET:
+		case PRN:
+		case JSR:
+			return got_first_op && !got_second_op;
+		
+		/* commands that accept no operands: */
+		case RTS:
+		case HLT:
+			return !got_first_op && !got_second_op;
+	}
+
+	return FALSE;
+}
+int validate_addressing_methods(int command,int first_address_method,int second_address_method){
+	switch(command){
+		/* all methods supported (number of operands validation done 
+		   in another function)
+		   or commands with no operands so we return true because the only
+		   check we need to do is check number of operands for them. */
+		case CMP:
+		case PRN:
+		case RTS:
+		case HLT:
+			return TRUE;
+		
+		/* commands that accept:
+		   Src: 0,1,2,3
+		   Dest: 1,2,3 */
+		case MOV:
+		case ADD:
+		case SUB:
+		return (first_address_method == INSTANT_ADDRESSING ||
+		       first_address_method == DIRECT_ADDRESSING ||
+		       first_address_method == STRUCT_ADDRESSING ||
+		       first_address_method == REGISTER_ADDRESSING) &&
+		       (second_address_method == DIRECT_ADDRESSING ||
+		       second_address_method == STRUCT_ADDRESSING ||
+		       second_address_method == REGISTER_ADDRESSING);
+		
+		       
+		/* commands that accept: 
+		   Src: doesn't have source operand.
+		   Dest: 1,2,3*/
+		case NOT:
+		case CLR:
+		case INC:
+		case DEC:
+		case JMP:
+		case BNE:
+		case GET:
+		case JSR:
+		return (first_address_method == DIRECT_ADDRESSING ||
+		       first_address_method == STRUCT_ADDRESSING ||
+		       first_address_method == REGISTER_ADDRESSING);
+		
+		/* lea command:
+		   Src: 1,2
+		   Dest: 1,2,3 */
+		case LEA:
+		return (first_address_method == DIRECT_ADDRESSING ||
+		       first_address_method == STRUCT_ADDRESSING) &&
+		       (second_address_method == DIRECT_ADDRESSING ||
+		       second_address_method == STRUCT_ADDRESSING ||
+		       second_address_method == REGISTER_ADDRESSING);
+		
+		
+	}
+	
+	return FALSE;
+}
+
+
+
 
 /* This method gets an operand and returns the number of the addressing
    method. */

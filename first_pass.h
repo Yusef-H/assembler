@@ -9,6 +9,9 @@ int is_command(char*);
 int is_label_op(char*);
 int is_struct_op(char*);
 
+int validate_num_operands(int, int, int);
+int validate_addressing_methods(int, int, int);
+
 void directive_handler(int, char*, label_ptr*);
 void data_directive_handler(char*);
 void string_directive_handler(char*);

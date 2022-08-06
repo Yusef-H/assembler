@@ -62,6 +62,14 @@ void throw_error(){
 		case INVALID_LABEL:
 			printf("\nInvalid label name in line %d.\n",line_number);
 			break;
+		case INVALID_SYNTAX:
+			printf("\nInvalid syntax in line %d.\n",line_number);
+			break;
+		case INVALID_ADDRESS_METHOD:
+			printf("\nInvalid addressing method for command in line %d.\n",line_number);
+			break;
+		case INVALID_NUM_OPERANDS:
+			printf("\nInvalid number of operands for command in line %d.\n", line_number);
 	
 	}
 	error_type = NO_ERROR;

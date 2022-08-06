@@ -5,7 +5,7 @@ LOOP:	jmp END
 		sub r1, r4
 		inc K
 			
-		mov S1.2 ,r3
+		mov S1.2 ,#-4
 		bne LOOP
 END:	hlt
 STR:	.string "abcdef"
