@@ -7,7 +7,8 @@
  from the input file after handling the macros so we can run first pass and 
  second pass on it.
 */
-
+#include <stdlib.h>
+#include <string.h>
 #include "pre_assembler.h"
 #include "utilities.h"
 #include "assembler.h"

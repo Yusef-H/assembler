@@ -1,4 +1,4 @@
-#include <ctype.h>
+/* Include dynamic tables header so we can use label types. */
 #include "dynamic_tables.h"
 
 void first_pass(FILE*);

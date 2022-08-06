@@ -17,10 +17,6 @@
 		type variable which holds two values (CODE/DATA).
 		
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "assembler.h"
 
 /* pre assembler DS */
 typedef struct macro_line* line_ptr;

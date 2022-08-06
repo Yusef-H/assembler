@@ -1,6 +1,17 @@
+/***********************************
+	First Pass Instructions File
+************************************/
 #include <stdlib.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
 #include "utilities.h"
 #include "first_pass.h"
+#include "assembler.h"
+
+/*
+	This file has methods that are used in parsing/validating instruction lines 
+*/
 
 extern int error_type;
 
@@ -42,6 +53,8 @@ int is_command(char* word){
 		return NOT_CMD;
 }
 
+/* This function checks if the number of operands received are valid for 
+   the command. */
 int validate_num_operands(int command,int got_first_op,int got_second_op){
 	switch(command){
 		/* commands that accept 2 operands: */
@@ -72,7 +85,10 @@ int validate_num_operands(int command,int got_first_op,int got_second_op){
 
 	return FALSE;
 }
-int validate_addressing_methods(int command,int first_address_method,int second_address_method){
+
+/* This function checks if the addressing methods are valid for the command. */
+int validate_addressing_methods(int command,int first_address_method,
+								int second_address_method){
 	switch(command){
 		/* all methods supported (number of operands validation done 
 		   in another function)
@@ -123,15 +139,9 @@ int validate_addressing_methods(int command,int first_address_method,int second_
 		       (second_address_method == DIRECT_ADDRESSING ||
 		       second_address_method == STRUCT_ADDRESSING ||
 		       second_address_method == REGISTER_ADDRESSING);
-		
-		
 	}
-	
 	return FALSE;
 }
-
-
-
 
 /* This method gets an operand and returns the number of the addressing
    method. */
@@ -179,6 +189,8 @@ int address_method_detector(char* op){
 	return NONE;
 }
 
+/* This function returns the number of extra words the addressing method
+   requires. */
 int method_extra_words(int method){
 	if(method == STRUCT_ADDRESSING)
 		return 2;

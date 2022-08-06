@@ -3,7 +3,8 @@
 ***********************/
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <string.h>
+#include <ctype.h>
 #include "assembler.h"
 #include "utilities.h"
 #include "first_pass.h"
@@ -20,10 +21,14 @@ int line_number;
 	
 	During the first pass:
 	- Add all labels to the symbol table.
-	- encode the data instructions (.data 1,2,3) to the data segment).
+	- encode the directives lines (.data 1,2,3) to the data segment.
+	- encode the first word in instructions lines.
 	- Check for possible errors and output them.
 	
-	This file makes use of 2 other more specific files which are
+	
+	This file has some general functions and makes use of 2 other 
+	more specific files which are:
+	
 	- first_pass_directives.c: Has all of the different directives 
 							   specific methods.
 	- first_pass_instructions.c: Has all of the different instructions
@@ -174,7 +179,7 @@ void directive_handler(int directive, char* params, label_ptr* label_table){
 	return;
 }
 
-/* This function handles command and validates if */
+/* This function handles command according to its type. */
 void command_handler(int command, char* params){
 	/* check MAX_LENGTH (maybe change to something smaller). */
 	char* first_operand = (char*)malloc(sizeof(char)*MAX_LENGTH);
@@ -267,22 +272,10 @@ void command_handler(int command, char* params){
 	}	
 }
 
-
-
-
-
-
-
-
-
-
-
+/* Encodes a value in the data segment. */
 void encode_in_data_segment(int value){
 	data_segment[DC++] = (unsigned int)value;
 }
-
-
-
 
 /* Checks if a word is a label with colon at the end. */
 int is_label(char* word, char* label_name){

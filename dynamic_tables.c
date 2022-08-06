@@ -12,7 +12,9 @@
  	     macro name, and each macro name will hold its lines as an
  	     inner linked list.
 */
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "assembler.h"
 #include "dynamic_tables.h"
 #include "pre_assembler.h"

@@ -1,6 +1,10 @@
+/********************************
+	First Pass Directives File
+*********************************/
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include "assembler.h"
 #include "utilities.h"
 #include "first_pass.h"
