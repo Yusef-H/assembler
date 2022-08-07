@@ -53,6 +53,9 @@ typedef struct label_item{
 
 label_ptr add_label(label_ptr*, char*);
 void delete_label(label_ptr* head,label_ptr*);
+void set_label_address(label_ptr,int);
+void turn_label_code_flag(label_ptr);
+void turn_label_ext_flag(label_ptr);
 void print_labels(label_ptr head);
 
 

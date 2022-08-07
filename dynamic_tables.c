@@ -203,6 +203,18 @@ void delete_label(label_ptr* head, label_ptr* label){
 	
 }
 
+/* this function sets label address */
+void set_label_address(label_ptr label, int address){
+	(*label).address = address;
+}
+
+void turn_label_code_flag(label_ptr label){
+	(*label).code_flag = ON;
+}
+
+void turn_label_ext_flag(label_ptr label){
+	(*label).ext_flag = ON;
+}
 void print_labels(label_ptr head){
 	while(head){
 		printf("%s, add:%d, code:%d, ext:%d->",head->label_name, head->address, head->code_flag, head->ext_flag);

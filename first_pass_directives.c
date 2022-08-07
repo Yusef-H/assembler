@@ -73,7 +73,7 @@ void extern_directive_handler(char* params, label_ptr* label_table){
 		return; 
 	params = get_word(params, label_name);
 	extern_label_ptr = add_label(label_table, label_name);
-	extern_label_ptr -> ext_flag = ON;
+	turn_label_ext_flag(extern_label_ptr);
 }
 
 /*

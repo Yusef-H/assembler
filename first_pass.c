@@ -132,7 +132,7 @@ void parse_line(char* line, label_ptr* label_table){
 				delete_label(label_table, &label_item);
 			}
 			else{
-				label_item->address = DC;
+				set_label_address(label_item, DC);
 			}
 		}
 		/* Handle the directive according to which directive it is. */
@@ -142,8 +142,8 @@ void parse_line(char* line, label_ptr* label_table){
 	else if((cmd = is_command(word))){
 		if(label_flag == ON){
 			/* flag that the label is in code segment */
-			label_item->code_flag = ON;
-			label_item->address = IC;
+			turn_label_code_flag(label_item);
+			set_label_address(label_item, IC);
 		}
 		IC++;
 		/* handle the command according to which command type it is. */
