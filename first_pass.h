@@ -18,10 +18,10 @@ void string_directive_handler(char*);
 void struct_directive_handler(char*);
 void entry_directive_handler(char*);
 void extern_directive_handler(char*, label_ptr*);
-
-
-
 void encode_in_data_segment(int value);
+
+unsigned int create_first_word(int,int , int , int , int);
+void encode_in_code_segment(unsigned int);
 
 void command_handler(int command, char* params);
 int address_method_detector(char* operand);

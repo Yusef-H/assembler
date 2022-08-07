@@ -11,6 +11,8 @@
 #define NUM_DIRECTIVES 5
 #define NUM_COMMANDS 16
 #define NUM_REGISTERS 8
+#define OPERAND_BITS 2
+#define ARE_BITS 2
 
 
 /* file types */
@@ -34,7 +36,7 @@ enum addressing_methods{
 enum directive_types{NOT_DIRECTIVE, DATA, STRING, STRUCT, ENTRY, EXTERN};
 
 /* Commands */
-enum command_types{NOT_CMD, MOV, CMP, ADD, SUB, NOT, CLR, LEA, INC, DEC,
+enum command_types{NOT_CMD = -1, MOV = 0, CMP, ADD, SUB, NOT, CLR, LEA, INC, DEC,
                    JMP, BNE, GET, PRN, JSR, RTS, HLT};
 
 

@@ -11,31 +11,6 @@
 
 extern int error_type;
 
-/* checks if a string is a valid directive and returns an int representing
-   the directive so we can handle it and its parameters. */
-int is_directive(char* word){
-	if(*word != '.'){
-		return NOT_DIRECTIVE;
-	}
-	if(!strcmp(word,".entry")){
-		return ENTRY;
-	}
-	else if(!strcmp(word,".extern")){
-		return EXTERN;
-	}
-	else if(!strcmp(word,".data")){
-		return DATA;
-	}
-	else if(!strcmp(word,".string")){
-		return STRING;
-	}
-	else if(!strcmp(word,".struct")){
-		return STRUCT;
-	}
-	
-	return NOT_DIRECTIVE;
-
-}
 
 void entry_directive_handler(char* params){
 	/* Here we check if the syntax has no errors, in the second pass

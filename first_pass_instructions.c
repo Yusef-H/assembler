@@ -15,43 +15,7 @@
 
 extern int error_type;
 
-/* Checks if a string is a command and returns an int representing it. */
-int is_command(char* word){
-	if(!strcmp(word,"mov"))
-		return MOV;
-	else if(!strcmp(word,"cmp"))
-		return CMP;
-	else if(!strcmp(word,"add"))
-		return ADD;
-	else if(!strcmp(word,"sub"))
-		return SUB;
-	else if(!strcmp(word,"not"))
-		return NOT;
-	else if(!strcmp(word,"clr"))
-		return CLR;	
-	else if(!strcmp(word,"lea"))
-		return LEA;	
-	else if(!strcmp(word,"inc"))
-		return INC;	
-	else if(!strcmp(word,"dec"))
-		return DEC;	
-	else if(!strcmp(word,"jmp"))
-		return JMP;	
-	else if(!strcmp(word,"bne"))
-		return BNE;	
-	else if(!strcmp(word,"get"))
-		return GET;	
-	else if(!strcmp(word,"prn"))
-		return PRN;	
-	else if(!strcmp(word,"jsr"))
-		return JSR;	
-	else if(!strcmp(word,"rts"))
-		return RTS;	
-	else if(!strcmp(word,"hlt"))
-		return HLT;	
-	else
-		return NOT_CMD;
-}
+
 
 /* This function checks if the number of operands received are valid for 
    the command. */

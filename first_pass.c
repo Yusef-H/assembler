@@ -72,6 +72,10 @@ void first_pass(FILE* fp_am){
 		printf("%u ",data_segment[i]);
 	}
 	printf("\n\n");
+	
+	/* if was error stop! */
+	
+	
 	/* 
 	 Update the labels table addresses by adding ic to each one.
 	 */
@@ -139,13 +143,12 @@ void parse_line(char* line, label_ptr* label_table){
 		directive_handler(directive, next_word_start, label_table);
 	}
 	
-	else if((cmd = is_command(word))){
+	else if((cmd = is_command(word)) != NOT_CMD){
 		if(label_flag == ON){
 			/* flag that the label is in code segment */
 			turn_label_code_flag(label_item);
 			set_label_address(label_item, IC);
 		}
-		IC++;
 		/* handle the command according to which command type it is. */
 		command_handler(cmd, next_word_start);
 	}
@@ -257,7 +260,9 @@ void command_handler(int command, char* params){
 		if(validate_num_operands(command, got_first_op, got_second_op)){ 
 			if(validate_addressing_methods(command, first_address_method,
 											 second_address_method)){	
-				/* build the first word! */
+				/* Create the first instruction word that goes into the 
+				   data segment. */
+				encode_in_code_segment(create_first_word(command, got_first_op, got_second_op, first_address_method, second_address_method));
 				
 			}
 			else{
@@ -272,9 +277,117 @@ void command_handler(int command, char* params){
 	}	
 }
 
+/* Checks if a string is a command and returns an int representing it. */
+int is_command(char* word){
+	if(!strcmp(word,"mov"))
+		return MOV;
+	else if(!strcmp(word,"cmp"))
+		return CMP;
+	else if(!strcmp(word,"add"))
+		return ADD;
+	else if(!strcmp(word,"sub"))
+		return SUB;
+	else if(!strcmp(word,"not"))
+		return NOT;
+	else if(!strcmp(word,"clr"))
+		return CLR;	
+	else if(!strcmp(word,"lea"))
+		return LEA;	
+	else if(!strcmp(word,"inc"))
+		return INC;	
+	else if(!strcmp(word,"dec"))
+		return DEC;	
+	else if(!strcmp(word,"jmp"))
+		return JMP;	
+	else if(!strcmp(word,"bne"))
+		return BNE;	
+	else if(!strcmp(word,"get"))
+		return GET;	
+	else if(!strcmp(word,"prn"))
+		return PRN;	
+	else if(!strcmp(word,"jsr"))
+		return JSR;	
+	else if(!strcmp(word,"rts"))
+		return RTS;	
+	else if(!strcmp(word,"hlt"))
+		return HLT;	
+	else
+		return NOT_CMD;
+}
+
+/* checks if a string is a valid directive and returns an int representing
+   the directive so we can handle it and its parameters. */
+int is_directive(char* word){
+	if(*word != '.'){
+		return NOT_DIRECTIVE;
+	}
+	if(!strcmp(word,".entry")){
+		return ENTRY;
+	}
+	else if(!strcmp(word,".extern")){
+		return EXTERN;
+	}
+	else if(!strcmp(word,".data")){
+		return DATA;
+	}
+	else if(!strcmp(word,".string")){
+		return STRING;
+	}
+	else if(!strcmp(word,".struct")){
+		return STRUCT;
+	}
+	
+	return NOT_DIRECTIVE;
+
+}
+
+
 /* Encodes a value in the data segment. */
 void encode_in_data_segment(int value){
 	data_segment[DC++] = (unsigned int)value;
+}
+
+unsigned int create_first_word(int command,int got_first_op, int got_second_op, int first_address_method, int second_address_method){
+	unsigned int first_word = 0;
+	/* first we insert the command */
+	first_word = command;
+	
+	/* Check if we have one operand */
+	if(got_first_op){
+		/* create place for operand method bits. */
+		first_word = first_word << OPERAND_BITS;
+		
+		/* If we have second operand */
+		if(got_second_op){
+			/* add first operand addressing method: */
+			first_word = first_word | first_address_method;
+			
+			/* create new place for the second operand address method */
+			first_word = first_word << OPERAND_BITS;
+			/* add second method */
+			first_word = first_word | second_address_method;
+			
+		}
+		/* else the one operand is destination operand
+		   so the 4th and 5th bits are zero */
+		else{
+			/* Skip the bits that were for source operand */
+			first_word = first_word << OPERAND_BITS;
+			/* add the addressing method */
+			first_word = first_word | first_address_method;
+		}
+	}
+	
+	/* add ARE bits which are absolute always in first words */
+	first_word = first_word << ARE_BITS;
+	
+	/* ADD A R E method */
+	return first_word;
+							   
+}
+
+void encode_in_code_segment(unsigned int word){
+	code_segment[IC++] = word;
 }
 
 /* Checks if a word is a label with colon at the end. */
