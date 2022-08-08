@@ -18,6 +18,10 @@
 		
 */
 
+#ifndef DYNAMIC_TABLES_H
+
+#define DYNAMIC_TABLES_H
+
 /* pre assembler DS */
 typedef struct macro_line* line_ptr;
 typedef struct macro_line{
@@ -56,8 +60,12 @@ void delete_label(label_ptr* head,label_ptr*);
 void set_label_address(label_ptr,int);
 void turn_label_code_flag(label_ptr);
 void turn_label_ext_flag(label_ptr);
+int turn_label_ent_flag(label_ptr, char*);
 void print_labels(label_ptr head);
+void update_addresses(label_ptr head, int);
 
+
+#endif
 
 
 

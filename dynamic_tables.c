@@ -142,6 +142,9 @@ label_ptr add_label(label_ptr* head, char* name){
 		exit(1);
 	}
 	
+	/* cut the colon */
+	name[name_len - 1] = '\0';
+	
 	/* 
 	 Does label name exists check
 	 */
@@ -203,6 +206,18 @@ void delete_label(label_ptr* head, label_ptr* label){
 	
 }
 
+void update_addresses(label_ptr head, int ic){
+	while(head){
+		/* skip the labels of instructions */
+		if(head->code_flag || head->ext_flag){
+			head = head->next;
+			continue;
+		}
+		head->address = head->address + ic + 1 + MEMORY_START;
+		head = head->next;
+	}
+}
+
 /* this function sets label address */
 void set_label_address(label_ptr label, int address){
 	(*label).address = address;
@@ -215,9 +230,20 @@ void turn_label_code_flag(label_ptr label){
 void turn_label_ext_flag(label_ptr label){
 	(*label).ext_flag = ON;
 }
+int turn_label_ent_flag(label_ptr head, char* label_name){
+	while(head){
+		if(strcmp(head->label_name, label_name) == 0){
+			head->ent_flag = ON;
+			return TRUE;
+		}
+		printf("%s\n",head->label_name);
+		head = head->next;
+	}
+	return FALSE;
+}
 void print_labels(label_ptr head){
 	while(head){
-		printf("%s, add:%d, code:%d, ext:%d->",head->label_name, head->address, head->code_flag, head->ext_flag);
+		printf("%s, add:%d, code:%d, ent:%d\n",head->label_name, head->address, head->code_flag, head->ent_flag);
 		head = head -> next;
 	}
 	printf(";;");

@@ -72,6 +72,9 @@ void throw_error(){
 		case INVALID_NUM_OPERANDS:
 			printf("\nInvalid number of operands for command in line %d.\n", line_number);
 			break;
+		case LABEL_DOESNT_EXIST:
+			printf("\nLabel name doesn't exist in labels table. Line: %d.\n",line_number);
+			break;
 	
 	}
 	error_type = NO_ERROR;

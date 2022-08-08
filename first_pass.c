@@ -30,9 +30,9 @@ int line_number;
 	more specific files which are:
 	
 	- first_pass_directives.c: Has all of the different directives 
-							   specific methods.
-	- first_pass_instructions.c: Has all of the different instructions
-								 (commands) specific methods.
+	  specific methods.
+	- first_pass_instructions.c: Has all of the different instruction
+	  (commands) specific methods.
 */
 
 /* 
@@ -41,8 +41,7 @@ int line_number;
   updates DC. And the function looks for all kinds of errors in the assembly
   file and outputs them.
 */
-void first_pass(FILE* fp_am){
-	int i;
+label_ptr first_pass(FILE* fp_am){
 	char* line = (char*)malloc(sizeof(char)*MAX_LENGTH);
 	/* Initializing an empty label table */
 	label_ptr label_table = NULL;
@@ -66,19 +65,22 @@ void first_pass(FILE* fp_am){
 	free(line);
 	
 	
-	print_labels(label_table);
-	printf("\n\n");
-	for(i=0; i<DC; i++){
-		printf("%u ",data_segment[i]);
-	}
-	printf("\n\n");
-	
 	/* if was error stop! */
 	
+	printf("\n\nIC VALUE: %d\n\n",IC);
 	
 	/* 
 	 Update the labels table addresses by adding ic to each one.
 	 */
+	 update_addresses(label_table, IC);
+	 
+	 return label_table;
+/*	printf("\n\n");*/
+/*	for(i=0; i<DC; i++){*/
+/*		printf("%u ",data_segment[i]);*/
+/*	}*/
+/*	printf("\n\n");*/
+	
 }
 
 /* 

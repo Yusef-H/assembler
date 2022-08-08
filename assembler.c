@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include "assembler.h"
 #include "pre_assembler.h"
-/*#include "second_pass.h"*/
+#include "second_pass.h"
 #include "utilities.h"
 
 #include "first_pass.h"
@@ -64,7 +64,8 @@ const char *registers[NUM_REGISTERS] = {
 
 int main(int argc, char *argv[]){
 	FILE *fp_as; /* input file (.as) */
-	FILE *fp_am;
+	FILE *fp_am; /* file after pre assembling. */
+	label_ptr labels_table; /* will hold the labels table returned from first_pass. */
 	char* appended_filename_as;
 	char* appended_filename_am;
 	int i;
@@ -91,12 +92,13 @@ int main(int argc, char *argv[]){
 		fclose(fp_as);  /* Done with the input file. */
 		
 		
-		/* First pass on fp_am */
+		/* First pass on fp_am (input file after handling macros). */
 		rewind(fp_am); /* rewind pointer to start of file. */
-		first_pass(fp_am);
+		labels_table = first_pass(fp_am);
 		
 		/* Second pass on fp_am */
-		
+		rewind(fp_am);
+		second_pass(fp_am, labels_table);
 		
 	
 	

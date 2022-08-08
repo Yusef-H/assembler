@@ -11,8 +11,8 @@ LOOP:   jmp R
 		prn K
 		inc r7
 X:		.data 2
-		jmp s8
-		jmp s8
-		jmp s8
-		jmp s8
+		jmp X
+		jmp X
+		jmp X
+		jmp X
 S: 		.struct 2,"ab"

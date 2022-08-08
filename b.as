@@ -16,8 +16,8 @@ LOOP:   jmp R
 		m1
 X:		.data 2
 		macro s8
-		jmp s8
-		jmp s8
+		jmp X
+		jmp X
 		endmacro
 		s8
 		s8
