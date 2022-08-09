@@ -236,7 +236,6 @@ int turn_label_ent_flag(label_ptr head, char* label_name){
 			head->ent_flag = ON;
 			return TRUE;
 		}
-		printf("%s\n",head->label_name);
 		head = head->next;
 	}
 	return FALSE;

@@ -14,5 +14,5 @@ first_pass_directives.o: first_pass_directives.c first_pass.h assembler.h utilit
 	gcc -c -g -Wall -pedantic -ansi first_pass_directives.c
 first_pass_instructions.o: first_pass_instructions.c first_pass.h assembler.h utilities.h
 	gcc -c -g -Wall -pedantic -ansi first_pass_instructions.c
-second_pass.o: second_pass.c assembler.h pre_assembler.h utilities.h
+second_pass.o: second_pass.c second_pass.h assembler.h pre_assembler.h utilities.h
 	gcc -c -g -Wall -pedantic -ansi second_pass.c

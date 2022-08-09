@@ -189,6 +189,7 @@ void command_handler(int command, char* params){
 	/* check MAX_LENGTH (maybe change to something smaller). */
 	char* first_operand = (char*)malloc(sizeof(char)*MAX_LENGTH);
 	char* second_operand = (char*)malloc(sizeof(char)*MAX_LENGTH);
+	int L = 0;
 	
 	/* flags for first and second operands that turn on when we have them
 	   in line after the command. */
@@ -215,7 +216,7 @@ void command_handler(int command, char* params){
 		first_address_method = address_method_detector(first_operand);
 		/* Update IC */
 		if(first_address_method != NONE){
-			IC = IC + method_extra_words(first_address_method);
+			L = L + method_extra_words(first_address_method);
 		}
 		
 		/* get next word into second_operand which should be , if it exists */
@@ -245,7 +246,7 @@ void command_handler(int command, char* params){
 					   		/* nothing IC doesnt change here (2 registers) */
 					}
 					else{
-						IC = IC + method_extra_words(second_address_method);
+						L = L + method_extra_words(second_address_method);
 					}
 				}
 				/* check for extraneous text error after second operand. */
@@ -265,7 +266,7 @@ void command_handler(int command, char* params){
 				/* Create the first instruction word that goes into the 
 				   data segment. */
 				encode_in_code_segment(create_first_word(command, got_first_op, got_second_op, first_address_method, second_address_method));
-				
+				IC = IC + L;
 			}
 			else{
 				error_type = INVALID_ADDRESS_METHOD;
