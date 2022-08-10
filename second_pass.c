@@ -10,10 +10,11 @@
 extern int error_type;
 extern int line_number;
 extern int IC;
+extern int DC;
 extern int code_segment[SIZE];
+extern int data_segment[SIZE];
 
-void second_pass(FILE* fp_am, label_ptr labels_table){
-	int i;
+void second_pass(FILE* fp_am, label_ptr labels_table, char* file_name){
 	char* line = (char*)malloc(sizeof(char)*MAX_LENGTH);
 	line_number = 1;
 	IC = 0;
@@ -31,12 +32,54 @@ void second_pass(FILE* fp_am, label_ptr labels_table){
 
 	}
 	print_labels(labels_table);
-	
-	printf("\n\n");
-	for(i = 0; i<100; i++){
-		printf("%d ",code_segment[i]);	
+	output_files_handler(file_name);
+}
+
+void output_files_handler(char* file_name){
+	create_object_file(file_name);
+}
+
+void create_object_file(char* file_name){
+	FILE* obj_file;
+	int i = 0;
+	unsigned int address = MEMORY_START;
+	char* temp1 = convert_to_base32(IC);
+	char* temp2 = convert_to_base32(DC);
+	if(temp1[0] == '!'){
+		temp1[0] = ' ';
 	}
-	free(line);
+	if(temp2[0] == '!'){
+		temp2[0] = ' ';
+	}
+	file_name = append_filename(file_name,OB);
+	obj_file = fopen(file_name, "w");
+	/* encoding IC and DC at start of object file */
+	fprintf(obj_file, "%s\t\t%s\n\n",temp1,temp2);
+	free(temp1);
+	free(temp2);
+	/* create code segment */
+	while(i < IC){
+		temp1 = convert_to_base32(address++);
+		temp2 = convert_to_base32(code_segment[i++]);
+		fprintf(obj_file, "%s\t\t%s\n",temp1,temp2);
+		free(temp1);
+		free(temp2);
+	}
+	
+	i = 0;
+	
+	while(i < DC){
+		temp1 = convert_to_base32(address++);
+		temp2 = convert_to_base32(data_segment[i++]);
+		fprintf(obj_file, "%s\t\t%s\n",temp1,temp2);
+		free(temp1);
+		free(temp2);
+	}
+	
+	
+	
+	
+	
 }
 
 void second_parse_line(char* line, label_ptr label_table){

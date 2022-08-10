@@ -143,7 +143,7 @@ label_ptr add_label(label_ptr* head, char* name){
 	}
 	
 	/* cut the colon */
-	name[name_len - 1] = '\0';
+	
 	
 	/* 
 	 Does label name exists check
@@ -280,7 +280,7 @@ int label_exist_check(label_ptr head,char* name){
 }
 void print_labels(label_ptr head){
 	while(head){
-		printf("%s, add:%d, code:%d, ent:%d\n",head->label_name, head->address, head->code_flag, head->ent_flag);
+		printf("%s   add:%d, code:%d, ent:%d, ext:%d\n",head->label_name, head->address, head->code_flag, head->ent_flag,head->ext_flag);
 		head = head -> next;
 	}
 	printf(";;");

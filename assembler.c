@@ -31,7 +31,7 @@ const char *directives[NUM_DIRECTIVES] = {
 
 /* The unique base 32 we got in the instructions. */
 const char base_32[32] = {
-	'!', '@', '#', '$', '%', '^', '&', '^', '<', '>',
+	'!', '@', '#', '$', '%', '^', '&', '*', '<', '>',
 	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
 	'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v'
 };
@@ -98,7 +98,7 @@ int main(int argc, char *argv[]){
 		
 		/* Second pass on fp_am */
 		rewind(fp_am);
-		second_pass(fp_am, labels_table);
+		second_pass(fp_am, labels_table, argv[i]);
 		
 	
 	

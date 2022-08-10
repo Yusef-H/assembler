@@ -1,5 +1,5 @@
 #include "dynamic_tables.h"
-void second_pass(FILE* fp_am, label_ptr);
+void second_pass(FILE* fp_am, label_ptr, char*);
 void second_parse_line(char*, label_ptr);
 
 void second_pass_command_handler(int command, char* params, label_ptr);
@@ -9,3 +9,6 @@ void encode_op_word(char* operand, int method, int is_src_op,label_ptr);
 void handle_label_encoding(char*,label_ptr);
 void handle_register_encoding(char*, char*, int, int);
 unsigned int encode_ARE(unsigned int, int);
+
+void output_files_handler(char*);
+void create_object_file(char*);

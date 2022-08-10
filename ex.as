@@ -1,6 +1,10 @@
-MAIN:	mov S1.1 ,LENGTH
+.entry LOOP
+.entry LENGTH
+.extern L3
+.extern W
+MAIN:	mov S1.1 ,W
 		add r2,STR
-LOOP:	jmp END
+LOOP:	jmp W
 		macro m1
 		inc K
 			
@@ -9,7 +13,7 @@ LOOP:	jmp END
 		prn #-5
 		sub r1, r4
 		m1
-		bne LOOP
+		bne L3
 END:	hlt
 STR:	.string "abcdef"
 LENGTH:	.data 6,-9,15

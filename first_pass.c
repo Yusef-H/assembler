@@ -67,8 +67,6 @@ label_ptr first_pass(FILE* fp_am){
 	
 	/* if was error stop! */
 	
-	printf("\n\nIC VALUE: %d\n\n",IC);
-	
 	/* 
 	 Update the labels table addresses by adding ic to each one.
 	 */
@@ -115,6 +113,8 @@ void parse_line(char* line, label_ptr* label_table){
 		
 	/* If it's a label */
 	if(is_label(word, label_name)){
+		int name_len = strlen(label_name);
+		label_name[name_len - 1] = '\0';
 		label_flag = ON;
 		/* add the label to labels table. and keep holding the new added
 		   label so we can update the label address/flags... while 

@@ -13,6 +13,7 @@ extern int line_number;
 extern const char *directives[NUM_DIRECTIVES];
 extern const char *commands[NUM_COMMANDS];
 extern const char *registers[NUM_REGISTERS];
+extern const char base_32[32];
 
 void throw_error(){
 	if(error_type == OPEN_FILE){
@@ -79,6 +80,22 @@ void throw_error(){
 	}
 	error_type = NO_ERROR;
 	return;
+}
+
+char* convert_to_base32(unsigned int word){
+	/* each 5 digits in binary is one digit in base 32 */
+	char* digits = (char*) malloc(sizeof(char)*BASE_32_DIGITS);
+	unsigned int first_digit;
+	unsigned int second_digit;
+	unsigned int mask = ~((~0) << 5);
+	second_digit = word & mask;
+	first_digit = ((mask<<5) & word)>>5;
+	
+	digits[0] = base_32[first_digit];
+	digits[1] = base_32[second_digit];
+	digits[2] = '\0';
+
+	return digits;
 }
 
 

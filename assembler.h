@@ -15,6 +15,7 @@
 #define ARE_BITS 2
 #define SRC_REGISTER_BITS 6
 #define MEMORY_START 100
+#define BASE_32_DIGITS 3
 
 
 /* file types */
