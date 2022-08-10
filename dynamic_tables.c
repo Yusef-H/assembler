@@ -214,7 +214,7 @@ void update_addresses(label_ptr head, int ic){
 			head = head->next;
 			continue;
 		}
-		head->address = head->address + ic + 1 + MEMORY_START;
+		head->address = head->address + ic  + MEMORY_START;
 		head = head->next;
 	}
 	
@@ -232,14 +232,14 @@ void update_addresses(label_ptr head, int ic){
 void set_label_address(label_ptr label, int address){
 	(*label).address = address;
 }
-int get_label_address(label_ptr head, char* name){
+label_ptr get_label(label_ptr head, char* name){
 	while(head){
 		if(strcmp(head->label_name, name) == 0){
-			return head->address;
+			return head;
 		}
 		head = head->next;
 	}
-	return NONE;
+	return NULL;
 }
 
 void turn_label_code_flag(label_ptr label){
@@ -248,6 +248,16 @@ void turn_label_code_flag(label_ptr label){
 
 void turn_label_ext_flag(label_ptr label){
 	(*label).ext_flag = ON;
+}
+
+int is_external_label(label_ptr label){
+	if(label->ext_flag)
+		return TRUE;
+	return FALSE;
+}
+
+int get_label_address(label_ptr label){
+	return label->address;
 }
 int turn_label_ent_flag(label_ptr head, char* label_name){
 	while(head){

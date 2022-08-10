@@ -177,15 +177,26 @@ void handle_register_encoding(char* src, char* dest, int is_src, int is_src_dest
 
 void handle_label_encoding(char* name, label_ptr label_table){
 	int address;
+	unsigned int word = 0;
+	label_ptr label = NULL;
 	if(!label_exist_check(label_table, name)){
 		error_type = LABEL_DOESNT_EXIST;
 		throw_error();
 		return;
 	}
 	
-	address = get_label_address(label_table, name);
-	printf("%d ",address);
-	encode_in_code_segment((unsigned int)address);
+	label = get_label(label_table, name);
+	address = get_label_address(label);
+	word = (unsigned int)address;
+	if(is_external_label(label)){
+		word = encode_ARE(word, EXTERNAL);
+	}
+	else{
+		word = encode_ARE(word, RELOCATABLE);
+	}
+	
+	
+	encode_in_code_segment(word);
 	
 }
 
@@ -218,6 +229,12 @@ int command_num_operands(int command){
 	}
 	/* ERRORRRRRRRRRRRRRRRRRRRRRRR */
 	return NONE;
+}
+
+unsigned int encode_ARE(unsigned int word, int are){
+	word = word << ARE_BITS;
+	word = word | are;
+	return word;
 }
 
 

@@ -8,3 +8,4 @@ void encode_extra_words(int num_operands, int, int, char*, char*, label_ptr);
 void encode_op_word(char* operand, int method, int is_src_op,label_ptr);
 void handle_label_encoding(char*,label_ptr);
 void handle_register_encoding(char*, char*, int, int);
+unsigned int encode_ARE(unsigned int, int);

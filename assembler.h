@@ -35,12 +35,13 @@ enum addressing_methods{
 	STRUCT_ADDRESSING, REGISTER_ADDRESSING
 };
 
+enum are{ABSOLUTE, EXTERNAL, RELOCATABLE};
+
 /* Directives */
 enum directive_types{NOT_DIRECTIVE, DATA, STRING, STRUCT, ENTRY, EXTERN};
 
 /* Commands */
-enum command_types{NOT_CMD = -1, MOV = 0, CMP, ADD, SUB, NOT, CLR, LEA, INC, DEC,
-                   JMP, BNE, GET, PRN, JSR, RTS, HLT};
+enum command_types{NOT_CMD = -1, MOV = 0, CMP, ADD, SUB, NOT, CLR, LEA, INC, DEC, JMP, BNE, GET, PRN, JSR, RTS, HLT};
 
 
 /* Flags */

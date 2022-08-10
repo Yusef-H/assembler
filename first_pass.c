@@ -208,6 +208,7 @@ void command_handler(int command, char* params){
 	
 	/* Get first operand */
 	next_word_start = get_word(params, first_operand);
+
 	
 	/* If first operand exists: */
 	if(strlen(first_operand) > 0){
@@ -257,27 +258,30 @@ void command_handler(int command, char* params){
 				}		
 			}
 		}
+	}
 		
-		/* validate number of parameters and addressing method types for 
-		   the command type. */
-		if(validate_num_operands(command, got_first_op, got_second_op)){ 
-			if(validate_addressing_methods(command, first_address_method,
-											 second_address_method)){	
-				/* Create the first instruction word that goes into the 
-				   data segment. */
-				encode_in_code_segment(create_first_word(command, got_first_op, got_second_op, first_address_method, second_address_method));
-				IC = IC + L;
-			}
-			else{
-				error_type = INVALID_ADDRESS_METHOD;
-				return;
-			}   
+		
+			
+	/* validate number of parameters and addressing method types for 
+	   the command type. */
+	if(validate_num_operands(command, got_first_op, got_second_op)){ 
+		if(validate_addressing_methods(command, first_address_method, second_address_method)){	
+										 
+			/* Create the first instruction word that goes into the 
+			   data segment. */
+			encode_in_code_segment(create_first_word(command, got_first_op, got_second_op, first_address_method, second_address_method));
+			IC = IC + L;
 		}
 		else{
-			error_type = INVALID_NUM_OPERANDS;
+			error_type = INVALID_ADDRESS_METHOD;
 			return;
-		}	
+		}   
+	}
+	else{
+		error_type = INVALID_NUM_OPERANDS;
+		return;
 	}	
+	
 }
 
 /* Checks if a string is a command and returns an int representing it. */
@@ -355,6 +359,7 @@ unsigned int create_first_word(int command,int got_first_op, int got_second_op, 
 	/* first we insert the command */
 	first_word = command;
 	
+	
 	/* Check if we have one operand */
 	if(got_first_op){
 		/* create place for operand method bits. */
@@ -379,6 +384,12 @@ unsigned int create_first_word(int command,int got_first_op, int got_second_op, 
 			/* add the addressing method */
 			first_word = first_word | first_address_method;
 		}
+	}
+	/* else its a command with no operands */
+	else{
+		/* skip both operands bits */
+		first_word = first_word << 2*OPERAND_BITS;
+	
 	}
 	
 	/* add ARE bits which are absolute always in first words */

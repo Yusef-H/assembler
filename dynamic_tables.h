@@ -58,13 +58,15 @@ typedef struct label_item{
 label_ptr add_label(label_ptr*, char*);
 void delete_label(label_ptr* head,label_ptr*);
 void set_label_address(label_ptr,int);
-int get_label_address(label_ptr, char*);
+label_ptr get_label(label_ptr, char*);
+int get_label_address(label_ptr label);
 void turn_label_code_flag(label_ptr);
 void turn_label_ext_flag(label_ptr);
 int turn_label_ent_flag(label_ptr, char*);
 void print_labels(label_ptr head);
 void update_addresses(label_ptr head, int);
 int label_exist_check(label_ptr head,char* name);
+int is_external_label(label_ptr label);
 
 
 #endif
