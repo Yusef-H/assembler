@@ -207,6 +207,7 @@ void delete_label(label_ptr* head, label_ptr* label){
 }
 
 void update_addresses(label_ptr head, int ic){
+	label_ptr temp_head = head;
 	while(head){
 		/* skip the labels of instructions */
 		if(head->code_flag || head->ext_flag){
@@ -216,11 +217,29 @@ void update_addresses(label_ptr head, int ic){
 		head->address = head->address + ic + 1 + MEMORY_START;
 		head = head->next;
 	}
+	
+	while(temp_head){
+		if(!(temp_head->code_flag)){
+			temp_head = temp_head->next;
+			continue;
+		}
+		temp_head->address = temp_head->address + MEMORY_START;
+		temp_head = temp_head->next;
+	}
 }
 
 /* this function sets label address */
 void set_label_address(label_ptr label, int address){
 	(*label).address = address;
+}
+int get_label_address(label_ptr head, char* name){
+	while(head){
+		if(strcmp(head->label_name, name) == 0){
+			return head->address;
+		}
+		head = head->next;
+	}
+	return NONE;
 }
 
 void turn_label_code_flag(label_ptr label){
@@ -236,6 +255,15 @@ int turn_label_ent_flag(label_ptr head, char* label_name){
 			head->ent_flag = ON;
 			return TRUE;
 		}
+		head = head->next;
+	}
+	return FALSE;
+}
+
+int label_exist_check(label_ptr head,char* name){
+	while(head){
+		if(strcmp(head->label_name,name) == 0)
+			return TRUE;
 		head = head->next;
 	}
 	return FALSE;

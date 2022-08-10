@@ -70,12 +70,12 @@ void second_parse_line(char* line, label_ptr label_table){
 		}
 	}
 	else if((command = is_command(word)) != NOT_CMD){
-		second_pass_command_handler(command, next_word_start);
+		second_pass_command_handler(command, next_word_start, label_table);
 	}
 	
 }
 
-void second_pass_command_handler(int command, char* params){
+void second_pass_command_handler(int command, char* params, label_ptr label_table){
 	char* next_word_start = params;
 	char first_operand[MAX_LENGTH];
 	char second_operand[MAX_LENGTH];
@@ -98,30 +98,30 @@ void second_pass_command_handler(int command, char* params){
 	}
 	/* first word encoded in first pass. */
 	IC++;
-	encode_extra_words(num_operands, first_address_method, second_address_method, first_operand, second_operand);
+	encode_extra_words(num_operands, first_address_method, second_address_method, first_operand, second_operand, label_table);
 
 }
 
-void encode_extra_words(int num_operands, int first_address_method, int second_address_method, char* first_op, char* second_op){
+void encode_extra_words(int num_operands, int first_address_method, int second_address_method, char* first_op, char* second_op, label_ptr label_table){
 	if(num_operands == 1){
-		encode_op_word(first_op, first_address_method, FALSE);
+		encode_op_word(first_op, first_address_method, FALSE, label_table);
 	}
 	else if(num_operands == 2){
-		encode_op_word(first_op, first_address_method, TRUE);
-		encode_op_word(second_op, second_address_method, FALSE);
+		encode_op_word(first_op, first_address_method, TRUE, label_table);
+		encode_op_word(second_op, second_address_method, FALSE, label_table);
 	}
-}
+}/* check the address after 452 should be 132 (k address)
+    seems like the problem is with not checking 2 register operands.*/
 
-void encode_op_word(char* operand, int method, int is_src_op){
+void encode_op_word(char* operand, int method, int is_src_op, label_ptr label_table){
 	unsigned int word = 0;
 	switch(method){
 		case INSTANT_ADDRESSING:
 			word = (unsigned)atoi((operand + 1));
 			encode_in_code_segment(word);
 			break;
-		case DIRECT_ADDRESSING:	
-			IC++;
-		
+		case DIRECT_ADDRESSING:
+			handle_label_encoding(operand, label_table);	
 			break;
 		case STRUCT_ADDRESSING:
 			IC = IC + 2;
@@ -130,6 +130,20 @@ void encode_op_word(char* operand, int method, int is_src_op){
 			IC++;
 			break;
 	}
+}
+
+void handle_label_encoding(char* name, label_ptr label_table){
+	int address;
+	if(!label_exist_check(label_table, name)){
+		error_type = LABEL_DOESNT_EXIST;
+		throw_error();
+		return;
+	}
+	
+	address = get_label_address(label_table, name);
+	printf("%d ",address);
+	encode_in_code_segment((unsigned int)address);
+	
 }
 
 int command_num_operands(int command){

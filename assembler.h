@@ -51,6 +51,7 @@ enum command_types{NOT_CMD = -1, MOV = 0, CMP, ADD, SUB, NOT, CLR, LEA, INC, DEC
 
 /* unique values */
 #define NONE -1
+
 #define EXIT_FAILURE 1
 
 
