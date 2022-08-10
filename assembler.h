@@ -13,6 +13,7 @@
 #define NUM_REGISTERS 8
 #define OPERAND_BITS 2
 #define ARE_BITS 2
+#define SRC_REGISTER_BITS 6
 #define MEMORY_START 100
 
 

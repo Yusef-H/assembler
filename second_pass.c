@@ -103,7 +103,10 @@ void second_pass_command_handler(int command, char* params, label_ptr label_tabl
 }
 
 void encode_extra_words(int num_operands, int first_address_method, int second_address_method, char* first_op, char* second_op, label_ptr label_table){
-	if(num_operands == 1){
+	if(first_address_method == REGISTER_ADDRESSING && second_address_method == REGISTER_ADDRESSING){
+		handle_register_encoding(first_op, second_op, TRUE, TRUE);
+	}
+	else if(num_operands == 1){
 		encode_op_word(first_op, first_address_method, FALSE, label_table);
 	}
 	else if(num_operands == 2){
@@ -115,6 +118,7 @@ void encode_extra_words(int num_operands, int first_address_method, int second_a
 
 void encode_op_word(char* operand, int method, int is_src_op, label_ptr label_table){
 	unsigned int word = 0;
+	char* temp;
 	switch(method){
 		case INSTANT_ADDRESSING:
 			word = (unsigned)atoi((operand + 1));
@@ -124,12 +128,51 @@ void encode_op_word(char* operand, int method, int is_src_op, label_ptr label_ta
 			handle_label_encoding(operand, label_table);	
 			break;
 		case STRUCT_ADDRESSING:
-			IC = IC + 2;
+			/* get struct label */
+			temp = operand;
+			while(*temp != '.'){
+				temp++;
+			}
+			*temp = '\0';
+			handle_label_encoding(operand, label_table);
+			*temp++ = '.';
+			encode_in_code_segment((unsigned)atoi(temp));
 			break;
 		case REGISTER_ADDRESSING:
-			IC++;
+			handle_register_encoding(operand, operand, is_src_op, FALSE);
 			break;
 	}
+}
+
+void handle_register_encoding(char* src, char* dest, int is_src, int is_src_dest){
+	unsigned int word = 0;
+	
+	if(is_src){
+		unsigned int src_num = 0;
+		src_num = (unsigned)atoi(src+1);
+		src_num = src_num << SRC_REGISTER_BITS;
+		/* if both src and dest are registers */
+		if(is_src_dest){
+			unsigned int dest_num = 0;
+			dest_num = (unsigned)atoi(dest+1);
+			dest_num = dest_num << ARE_BITS;
+			word = dest_num | src_num;
+			encode_in_code_segment(word);
+		}
+		else{
+			word = word | src_num;
+			encode_in_code_segment(word);
+		}
+	}
+	else{
+		unsigned int dest_num = 0;
+		dest_num = (unsigned)atoi(dest+1);
+		dest_num = dest_num << ARE_BITS;
+		word = word | dest_num;
+		encode_in_code_segment(word);
+	}
+	
+	
 }
 
 void handle_label_encoding(char* name, label_ptr label_table){
