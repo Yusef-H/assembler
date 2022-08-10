@@ -165,6 +165,7 @@ void encode_op_word(char* operand, int method, int is_src_op, label_ptr label_ta
 	switch(method){
 		case INSTANT_ADDRESSING:
 			word = (unsigned)atoi((operand + 1));
+			word = encode_ARE(word,ABSOLUTE);
 			encode_in_code_segment(word);
 			break;
 		case DIRECT_ADDRESSING:
@@ -179,7 +180,9 @@ void encode_op_word(char* operand, int method, int is_src_op, label_ptr label_ta
 			*temp = '\0';
 			handle_label_encoding(operand, label_table);
 			*temp++ = '.';
-			encode_in_code_segment((unsigned)atoi(temp));
+			word = (unsigned)atoi(temp);
+			word = encode_ARE(word,ABSOLUTE);
+			encode_in_code_segment(word);
 			break;
 		case REGISTER_ADDRESSING:
 			handle_register_encoding(operand, operand, is_src_op, FALSE);
