@@ -8,6 +8,7 @@
 #include "first_pass.h"
 
 extern int error_type;
+extern int error_occurred;
 extern int line_number;
 extern int IC;
 extern int DC;
@@ -31,8 +32,11 @@ void second_pass(FILE* fp_am, label_ptr labels_table, char* file_name){
 		line_number++;
 
 	}
+	update_ext_addresses(labels_table);
 	print_labels(labels_table);
-	output_files_handler(file_name);
+	if(!error_occurred)
+		output_files_handler(file_name);
+	
 }
 
 void output_files_handler(char* file_name){
@@ -235,6 +239,7 @@ void handle_label_encoding(char* name, label_ptr label_table){
 	address = get_label_address(label);
 	word = (unsigned int)address;
 	if(is_external_label(label)){
+		add_ext_label_address(label, IC);
 		word = encode_ARE(word, EXTERNAL);
 	}
 	else{

@@ -18,6 +18,7 @@
 /* Global Variable for error types in all the program
    The error types are in an enum in assembler.h file */
 int error_type;
+int error_occurred = FALSE;
 
 /* Code segment and Data segment arrays in order to split them
    in the object file. */

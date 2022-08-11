@@ -49,6 +49,7 @@ void extern_directive_handler(char* params, label_ptr* label_table){
 	params = get_word(params, label_name);
 	extern_label_ptr = add_label(label_table, label_name);
 	turn_label_ext_flag(extern_label_ptr);
+	set_label_address(extern_label_ptr, 0);
 }
 
 /*

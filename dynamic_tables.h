@@ -44,6 +44,14 @@ void write_macro_lines_to_file(item_ptr*, FILE*);
 void print_macro_table(item_ptr);
 void write_macro_lines(item_ptr, FILE*);
 
+
+/* linked list of addresses for external labels. */
+typedef struct address_item* address_ptr;
+typedef struct address_item{
+	int address;
+	address_ptr next;
+} address_item;
+
 /* First pass DS */
 typedef struct label_item* label_ptr;
 typedef struct label_item{
@@ -51,9 +59,21 @@ typedef struct label_item{
 	int address;
 	int code_flag; 
 	int ext_flag;
+	address_ptr addresses;
 	int ent_flag;
 	label_ptr next;
 } label_item;
+
+
+
+
+
+typedef struct ext_label* ext_label_ptr;
+typedef struct ext_label{
+	char* label_name;
+	address_ptr addresses;
+	ext_label_ptr next;
+} ext_label;
 
 label_ptr add_label(label_ptr*, char*);
 void delete_label(label_ptr* head,label_ptr*);
@@ -65,8 +85,12 @@ void turn_label_ext_flag(label_ptr);
 int turn_label_ent_flag(label_ptr, char*);
 void print_labels(label_ptr head);
 void update_addresses(label_ptr head, int);
+void update_ext_addresses(label_ptr head);
+
 int label_exist_check(label_ptr head,char* name);
 int is_external_label(label_ptr label);
+
+void add_ext_label_address(label_ptr label, int address);
 
 
 #endif

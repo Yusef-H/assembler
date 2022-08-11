@@ -207,24 +207,36 @@ void delete_label(label_ptr* head, label_ptr* label){
 }
 
 void update_addresses(label_ptr head, int ic){
-	label_ptr temp_head = head;
 	while(head){
 		/* skip the labels of instructions */
-		if(head->code_flag || head->ext_flag){
+		if(!(head->code_flag) && !(head->ext_flag)){
+			head->address = head->address + ic  + MEMORY_START;
 			head = head->next;
-			continue;
 		}
-		head->address = head->address + ic  + MEMORY_START;
-		head = head->next;
+		else if((head->code_flag) && !(head->ext_flag)){
+			head->address = head->address + MEMORY_START;
+			head = head->next;
+		}
+		else{
+			/* we skip external addresses for now
+			   they will be updated after second pass. */
+			head = head->next;
+		}
+		
 	}
 	
-	while(temp_head){
-		if(!(temp_head->code_flag)){
-			temp_head = temp_head->next;
-			continue;
+}
+
+void update_ext_addresses(label_ptr head){
+	while(head){
+		if(head->ext_flag){
+			address_ptr temp = head->addresses;
+			while(temp){
+				temp->address = temp->address + MEMORY_START;
+				temp = temp->next;
+			}
 		}
-		temp_head->address = temp_head->address + MEMORY_START;
-		temp_head = temp_head->next;
+		head = head->next;
 	}
 }
 
@@ -251,9 +263,7 @@ void turn_label_ext_flag(label_ptr label){
 }
 
 int is_external_label(label_ptr label){
-	if(label->ext_flag)
-		return TRUE;
-	return FALSE;
+	return label->ext_flag;
 }
 
 int get_label_address(label_ptr label){
@@ -280,10 +290,38 @@ int label_exist_check(label_ptr head,char* name){
 }
 void print_labels(label_ptr head){
 	while(head){
-		printf("%s   add:%d, code:%d, ent:%d, ext:%d\n",head->label_name, head->address, head->code_flag, head->ent_flag,head->ext_flag);
+		printf("%s    add:%d, code:%d, ent:%d, ext:%d",head->label_name, head->address, head->code_flag, head->ent_flag,head->ext_flag);
+		if(head->ext_flag){
+			address_ptr temp = head->addresses;
+			printf("      external addresses:");
+			while(temp){
+				printf(" %d  ",temp->address);
+				temp = temp->next;
+			}
+		}
+		printf("\n\n");
 		head = head -> next;
 	}
 	printf(";;");
+}
+
+void add_ext_label_address(label_ptr label, int address){
+	address_ptr address_item = (address_ptr)malloc(sizeof(address_item));
+	address_ptr temp;
+	address_item->address = address;
+/*	printf("%s \n",label->label_name);*/
+	
+	temp = label->addresses;
+	if(!temp){	
+		label->addresses = address_item;
+		address_item->next = NULL;
+		return;
+	}
+	while(temp->next){
+		temp = temp->next;
+	}
+	temp->next = address_item;
+	address_item->next = NULL;
 }
 
 

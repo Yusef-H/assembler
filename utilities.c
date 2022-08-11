@@ -8,6 +8,7 @@
 /* remove them to header files later */
 #define MAX_APPEND 5
 extern int error_type;
+extern int error_occurred;
 extern int line_number;
 
 extern const char *directives[NUM_DIRECTIVES];
@@ -76,8 +77,12 @@ void throw_error(){
 		case LABEL_DOESNT_EXIST:
 			printf("\nUndefined label in Line: %d.\n",line_number);
 			break;
+		case EXT_LABEL_EXISTS:
+			printf("\nCan't define same extern label twice, line %d.\n",line_number);
+			break;
 	
 	}
+	error_occurred = TRUE;
 	error_type = NO_ERROR;
 	return;
 }
