@@ -16,6 +16,8 @@ extern int code_segment[SIZE];
 extern int data_segment[SIZE];
 
 void second_pass(FILE* fp_am, label_ptr labels_table, char* file_name){
+	/* flags to check if there was any enternal or external labels */
+	int ext_exist = OFF,ent_exist = OFF;
 	char* line = (char*)malloc(sizeof(char)*MAX_LENGTH);
 	line_number = 1;
 	IC = 0;
@@ -34,13 +36,25 @@ void second_pass(FILE* fp_am, label_ptr labels_table, char* file_name){
 	}
 	update_ext_addresses(labels_table);
 	print_labels(labels_table);
-	if(!error_occurred)
-		output_files_handler(file_name);
+	ext_exist = ext_exist_check(labels_table);
+	ent_exist = ent_exist_check(labels_table);
+	/* create output files if there was no error only. */
+	if(!error_occurred){
+		output_files_handler(file_name,labels_table,ext_exist,ent_exist);
+	}
+	
+	
 	
 }
 
-void output_files_handler(char* file_name){
+void output_files_handler(char* file_name,label_ptr labels_table, int ext, int ent){
 	create_object_file(file_name);
+	if(ext){
+		create_ext_file(file_name, labels_table);	
+	}
+	if(ent){
+		create_ent_file(file_name,labels_table);
+	}
 }
 
 void create_object_file(char* file_name){
@@ -78,12 +92,45 @@ void create_object_file(char* file_name){
 		fprintf(obj_file, "%s\t\t%s\n",temp1,temp2);
 		free(temp1);
 		free(temp2);
+	}	
+	fclose(obj_file);
+}
+
+void create_ext_file(char* file_name,label_ptr labels_table){
+	FILE* ext_file;
+	label_ptr temp = labels_table;
+	file_name = append_filename(file_name, EXT);
+	ext_file = fopen(file_name, "w");
+	while(temp){
+		if(temp->ext_flag){
+			address_ptr addresses = temp->addresses;
+			while(addresses){
+				char* address = convert_to_base32(addresses->address);
+				fprintf(ext_file,"%s\t%s\n",temp->label_name, address);
+				free(address);
+				addresses = addresses->next;
+			}
+			
+		}
+		temp = temp->next;
 	}
-	
-	
-	
-	
-	
+	fclose(ext_file);
+}
+
+void create_ent_file(char* file_name, label_ptr labels_table){
+	FILE* ent_file;
+	label_ptr temp = labels_table;
+	file_name = append_filename(file_name, ENT);
+	ent_file = fopen(file_name, "w");
+	while(temp){
+		if(temp->ent_flag){
+			char* address = convert_to_base32(temp->address);
+			fprintf(ent_file,"%s\t%s\n",temp->label_name, address);
+			free(address);
+		}
+		temp = temp->next;
+	}
+	fclose(ent_file);
 }
 
 void second_parse_line(char* line, label_ptr label_table){

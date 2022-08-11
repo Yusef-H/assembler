@@ -10,5 +10,7 @@ void handle_label_encoding(char*,label_ptr);
 void handle_register_encoding(char*, char*, int, int);
 unsigned int encode_ARE(unsigned int, int);
 
-void output_files_handler(char*);
+void output_files_handler(char*,label_ptr,int,int);
 void create_object_file(char*);
+void create_ext_file(char*,label_ptr);
+void create_ent_file(char*,label_ptr);

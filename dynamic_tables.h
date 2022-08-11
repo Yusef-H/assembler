@@ -90,6 +90,9 @@ void update_ext_addresses(label_ptr head);
 int label_exist_check(label_ptr head,char* name);
 int is_external_label(label_ptr label);
 
+int ent_exist_check(label_ptr head);
+int ext_exist_check(label_ptr head);
+
 void add_ext_label_address(label_ptr label, int address);
 
 

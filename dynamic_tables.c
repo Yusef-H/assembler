@@ -240,6 +240,24 @@ void update_ext_addresses(label_ptr head){
 	}
 }
 
+int ext_exist_check(label_ptr head){
+	while(head){
+		if(head->ext_flag)
+			return TRUE;
+		head = head->next;
+	}
+	return FALSE;
+}
+
+int ent_exist_check(label_ptr head){
+	while(head){
+		if(head->ent_flag)
+			return TRUE;
+		head = head->next;
+	}
+	return FALSE;
+}
+
 /* this function sets label address */
 void set_label_address(label_ptr label, int address){
 	(*label).address = address;
