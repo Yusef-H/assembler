@@ -5,7 +5,7 @@
 		cmp #-5,K
 		cmp #2,S.1
 NEW:    .data 3 ,5,6,7
-LOOP:   jmp R
+LOOP:   jmp K
 		jsr S.2
 		prn W
 		prn K
@@ -16,3 +16,5 @@ X:		.data 2
 		jmp X
 		jmp X
 S: 		.struct 2,"ab"
+.extern W
+.extern K

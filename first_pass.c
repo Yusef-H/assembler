@@ -13,8 +13,8 @@
 extern int error_type;
 extern unsigned int data_segment[SIZE];
 extern unsigned int code_segment[SIZE];
-int IC = 0;
-int DC = 0;
+extern int IC;
+extern int DC;
 int line_number;
 /*
 	This file handles the first pass on the file
@@ -47,6 +47,8 @@ label_ptr first_pass(FILE* fp_am){
 	label_ptr label_table = NULL;
 	
 	line_number = 1;
+	IC = 0;
+	DC = 0;
 	
 	
 	while(fgets(line, MAX_LENGTH, fp_am)){
@@ -143,6 +145,7 @@ void parse_line(char* line, label_ptr* label_table){
 		}
 		/* Handle the directive according to which directive it is. */
 		directive_handler(directive, next_word_start, label_table);
+
 	}
 	
 	else if((cmd = is_command(word)) != NOT_CMD){
@@ -351,6 +354,7 @@ int is_directive(char* word){
 
 /* Encodes a value in the data segment. */
 void encode_in_data_segment(int value){
+/*	printf("\n%d\n",value);*/
 	data_segment[DC++] = (unsigned int)value;
 }
 

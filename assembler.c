@@ -24,6 +24,8 @@ int error_occurred = FALSE;
    in the object file. */
 unsigned int data_segment[SIZE];
 unsigned int code_segment[SIZE];
+int IC;
+int DC;
 
 /* directives */
 const char *directives[NUM_DIRECTIVES] = { 
@@ -101,12 +103,27 @@ int main(int argc, char *argv[]){
 		rewind(fp_am);
 		second_pass(fp_am, labels_table, argv[i]);
 		
-	
-	
+		
+		labels_table = free_labels_table(&labels_table);
+		reset_globals();
 		/*free(appended_filename);	*/
 	}
 	
 	return 0;
+}
+
+void reset_globals(){
+	int i;
+	for(i = 0; i< IC; i++){
+		code_segment[i] = 0;
+	}
+	for(i = 0; i< DC; i++){
+		data_segment[i] = 0;
+	}
+	IC = 0;
+	DC = 0;
+	error_type = NO_ERROR;
+	error_occurred = FALSE;
 }
 
 

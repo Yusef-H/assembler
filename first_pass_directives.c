@@ -132,7 +132,7 @@ void data_directive_handler(char* params){
 			got_num_flag = ON;
 			*temp_num++ = *temp_params++;
 		}
-		temp_num = '\0';
+		*temp_num = '\0';
 		/* next non whitespace char after a number can be either a comma
 		   or a new line character if end of line or eof if end of file */
 		next_char = *(skip_whitespaces(temp_params));
@@ -190,8 +190,9 @@ void struct_directive_handler(char* params){
 		error_type = MISSING_FIELDS;
 		return;
 	}
-	if(*params == '+' || *params == '-')
-		params++;
+	if(*params == '+' || *params == '-'){
+		*number_ptr++ = *params++;
+	}
 	/* get number parameter */
 	while(isdigit(*params)){
 		*number_ptr++ = *params++;

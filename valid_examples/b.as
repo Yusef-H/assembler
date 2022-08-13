@@ -6,7 +6,7 @@
       	k7
       	k7
 NEW:    .data 3 ,5,6,7
-LOOP:   jmp R
+LOOP:   jmp K
 		macro m1
 		prn K
 		inc r7
@@ -22,3 +22,5 @@ X:		.data 2
 		s8
 		s8
 S: 		.struct 2,"ab"
+.extern W
+.extern K

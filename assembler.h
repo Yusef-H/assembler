@@ -17,6 +17,7 @@
 #define MEMORY_START 100
 #define BASE_32_DIGITS 3
 
+void reset_globals();
 
 /* file types */
 enum file_types{AS, AM, OB, EXT, ENT};

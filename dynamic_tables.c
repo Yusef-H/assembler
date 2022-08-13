@@ -142,7 +142,6 @@ label_ptr add_label(label_ptr* head, char* name){
 		exit(1);
 	}
 	
-	/* cut the colon */
 	
 	
 	/* 
@@ -151,6 +150,8 @@ label_ptr add_label(label_ptr* head, char* name){
 	if(name_len < MAX_LABEL_LENGTH){
 		new_label_item->label_name = (char*)calloc(sizeof(char),(name_len));
 		strcpy(new_label_item->label_name, name);
+		new_label_item->ent_flag = OFF;
+		new_label_item->ext_flag = OFF;
 	}
 	else{
 		/*error*/
@@ -340,6 +341,18 @@ void add_ext_label_address(label_ptr label, int address){
 	}
 	temp->next = address_item;
 	address_item->next = NULL;
+}
+
+label_ptr free_labels_table(label_ptr* head_addr){
+	label_ptr head = *head_addr;
+	label_ptr to_free = head;
+	while(head){
+		head = head->next;
+		free(to_free);
+		to_free = head;
+	}
+	head = NULL;
+	return head;
 }
 
 
