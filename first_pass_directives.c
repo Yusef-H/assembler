@@ -10,6 +10,8 @@
 #include "first_pass.h"
 
 extern int error_type;
+extern unsigned int data_segment[SIZE];
+extern int DC;
 
 
 void entry_directive_handler(char* params){
@@ -219,3 +221,12 @@ void struct_directive_handler(char* params){
 	
 	string_directive_handler(params);
 }
+
+
+/* Encodes a value in the data segment. */
+void encode_in_data_segment(int value){
+/*	printf("\n%d\n",value);*/
+	data_segment[DC++] = (unsigned int)value;
+}
+
+

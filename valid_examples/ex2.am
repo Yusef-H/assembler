@@ -7,6 +7,9 @@ XYZ:	jmp W
 		prn         #-50
 		
 		sub r1          ,r4
+		inc K
+; This is comment!!!!!
+		mov S1.2,      r3
 		bne L3
 END:	hlt
 STR: 	.string "abcdef"

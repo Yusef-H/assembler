@@ -1,8 +1,8 @@
-		move r1,r2
-		prn ;;;
-		.struct 88, ,"sdasdsad"
-		.struct 88,"sdasdsad", 
-		.string dasdsi
-		.data 2    3   4
-		.data 2,3,4,
-		.data 77,,,,,4
+L:			movee L,r4
+			sub L r5
+			sub r6,
+			sub r6, L hello extra text
+			mov r6, #5
+			sub L, #16
+			
+			

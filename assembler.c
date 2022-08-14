@@ -66,42 +66,45 @@ int main(int argc, char *argv[]){
 	char* appended_filename_am;
 	int i;
 	for(i = 1; i<argc; i++){
+		/* Get the .as file name */
 		appended_filename_as = append_filename(argv[i], AS); 
+		/* Prepare the .am file name for pre assembling. */
 		appended_filename_am = append_filename(argv[i], AM);
 		
 		fp_as = fopen(appended_filename_as, "r");
-		if(!fp_as){
-			error_type = OPEN_FILE;
-			throw_error(0);
-		}
-		
 		fp_am = fopen(appended_filename_am, "w+");
-		if(!fp_am){
-			error_type = OPEN_FILE;
-			throw_error(0);
+		if(!fp_am || !fp_am){
+			/* fp_am file opening can fail also if there's permission
+			   issues
+		    */
+			printf("Cannot open file");
+			/* Continue if there's other files */
+			continue;
 		}
 		
-		/* Run pre assembler */
+		/* Run pre assembler and create the .am file. */
 		pre_assembler_algorithm(fp_as, fp_am); 
+		fclose(fp_as);  /* Done with the .as file. */
 		
-		fclose(fp_as);  /* Done with the input file. */
+		/* Run First pass on fp_am (.as file after handling macros). */
+		rewind(fp_am); /* rewind pointer to the start of file. */
 		
-		
-		/* First pass on fp_am (input file after handling macros). */
-		rewind(fp_am); /* rewind pointer to start of file. */
+		/* first pass returns the label table so we use it in second pass. */
 		labels_table = first_pass(fp_am);
-		
+	
 		/* Second pass on fp_am */
 		rewind(fp_am);
 		second_pass(fp_am, labels_table, argv[i]);
-		
+	
+		/* 
+		Free the used memory and reset globals so we can move on 
+		the new file (if there is).
+		*/
 		
 		labels_table = free_labels_table(&labels_table);
-		
-		/* Reset global variables after dealing with each file. */
-		reset_globals();
 		free(appended_filename_as);
 		free(appended_filename_am);	
+		reset_globals();
 	}
 	
 	return 0;
@@ -111,14 +114,15 @@ int main(int argc, char *argv[]){
    in the program. */
 void reset_globals(){
 	int i;
+	/* Clear code segment. */
 	for(i = 0; i< IC; i++){
 		code_segment[i] = 0;
 	}
+	/* Clear data segment. */
 	for(i = 0; i< DC; i++){
 		data_segment[i] = 0;
 	}
-	IC = 0;
-	DC = 0;
+	/* reset errors global variables. */
 	error_type = NO_ERROR;
 	error_occurred = FALSE;
 }

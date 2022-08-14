@@ -14,6 +14,8 @@
 */
 
 extern int error_type;
+extern unsigned int code_segment[SIZE];
+extern int IC;
 
 
 
@@ -162,36 +164,56 @@ int method_extra_words(int method){
 	return 1;
 }
 
-
-/* This function checks if the given word is a struct operand. */
-int is_struct_op(char* word){
-	/* This will hold label before the dot (ex: S1.2 -> label = "S1"). */
-	char* label = (char*)malloc(sizeof(char)*MAX_LABEL_LENGTH);
-	int length = strlen(word);
-	int i = 0;
-	if(!label){
-		printf("Memory allocation failed");
-		exit(1);
-	}
-	/* take the label name */
-	while(i < length && word[i] != '.'){
-		label[i] = word[i];
-		i++;
-	}
-	label[i] = '\0';
-
-	/* if theres no dot then its not a struct */
-	if(word[i] != '.')
-		return FALSE;
+unsigned int create_first_word(int command,int got_first_op, int got_second_op, int first_address_method, int second_address_method){
+	unsigned int first_word = 0;
+	/* first we insert the command */
+	first_word = command;
 	
-	/* if its not a label */
-	if(!is_label_op(label))
-		return FALSE;
-	/* skip the dot */
-	i++;
-	/* struct has two fields only */
-	if(word[i] != '1' && word[i] != '2')
-		return FALSE;
+	
+	/* Check if we have one operand */
+	if(got_first_op){
+		/* create place for operand method bits. */
+		first_word = first_word << OPERAND_BITS;
 		
-	return TRUE;
+		/* If we have second operand */
+		if(got_second_op){
+			/* add first operand addressing method: */
+			first_word = first_word | first_address_method;
+			
+			/* create new place for the second operand address method */
+			first_word = first_word << OPERAND_BITS;
+			/* add second method */
+			first_word = first_word | second_address_method;
+			
+		}
+		/* else the one operand is destination operand
+		   so the 4th and 5th bits are zero */
+		else{
+			/* Skip the bits that were for source operand */
+			first_word = first_word << OPERAND_BITS;
+			/* add the addressing method */
+			first_word = first_word | first_address_method;
+		}
+	}
+	/* else its a command with no operands */
+	else{
+		/* skip both operands bits */
+		first_word = first_word << 2*OPERAND_BITS;
+	
+	}
+	
+	/* add ARE bits which are absolute always in first words */
+	first_word = first_word << ARE_BITS;
+	
+	/* ADD A R E method */
+	return first_word;
+							   
 }
+
+
+void encode_in_code_segment(unsigned int word){
+	code_segment[IC++] = word;
+}
+
+
+

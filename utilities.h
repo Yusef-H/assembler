@@ -12,6 +12,11 @@ void empty_word(char*);
 
 int is_reserved_word(char*);
 
+int is_label(char* word, char* label_name);
+int is_label_op(char* word);
+int is_struct_op(char* word);
+
+
 char* skip_whitespaces(char* );
 
 char* skip_line(char*);

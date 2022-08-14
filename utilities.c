@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include "utilities.h"
 #include "assembler.h"
 
@@ -65,8 +66,8 @@ void throw_error(){
 		case INVALID_LABEL:
 			printf("\nInvalid label name in line %d.\n",line_number);
 			break;
-		case INVALID_SYNTAX:
-			printf("\nInvalid syntax in line %d.\n",line_number);
+		case INVALID_COMMAND_DIRECTIVE:
+			printf("\nInvalid command/directive in line %d.\n",line_number);
 			break;
 		case INVALID_ADDRESS_METHOD:
 			printf("\nInvalid addressing method for command in line %d.\n",line_number);
@@ -86,6 +87,7 @@ void throw_error(){
 	error_type = NO_ERROR;
 	return;
 }
+
 
 char* convert_to_base32(unsigned int word){
 	/* each 5 digits in binary is one digit in base 32 */
@@ -208,6 +210,102 @@ int is_register(char* operand){
 	}
 	return FALSE;
 }
+
+/* Checks if a word is a label with colon at the end. */
+int is_label(char* word, char* label_name){
+
+	/* This will hold the label name without the colon. */
+	char* label_no_colon = (char*)malloc(sizeof(char)*MAX_LABEL_LENGTH+1);
+	int length = strlen(word);
+	int i = 0;
+	if(!label_no_colon){
+		printf("memory allocation failed");
+		exit(1);
+	}
+	/* get label name without the colon (if there is) . */
+	while(i < length && word[i] != ':'){
+		label_no_colon[i] = word[i];
+		i++;
+	}
+	label_no_colon[i] = '\0';
+	
+	/* check if its a valid label name */
+	if(!is_label_op(label_no_colon)){
+		return FALSE;
+	}
+			
+	/* its a label name, but is there a colon? */
+	if(word[length - 1] != ':'){
+		return FALSE;
+	}
+	/* copy the label name so we can add it to labels table. */
+	while(*word != '\0'){
+		*label_name++ = *word++;
+	}
+	*label_name = '\0';
+	return TRUE;	
+}
+
+/* This function checks if the word is a label operand 
+   (label without a colon). */
+int is_label_op(char* word){
+	int length = strlen(word);
+	int i;
+	/* reserved word check. */
+	if(is_reserved_word(word)){
+		return FALSE;
+	}
+	/* label must start with alphabetical character. */
+	if(!isalpha(*word)){
+		return FALSE;
+	}
+	/* max label length check. */
+	if(length > MAX_LABEL_LENGTH){
+		return FALSE;
+	}
+	/* labels alphanumeric characters check. */
+	for(i = 0; i<length; i++){
+		if(!(isalnum(word[i]))){
+			return FALSE;
+		}
+	}
+	return TRUE;
+}
+
+/* This function checks if the given word is a struct operand. */
+int is_struct_op(char* word){
+	/* This will hold label before the dot (ex: S1.2 -> label = "S1"). */
+	char* label = (char*)malloc(sizeof(char)*MAX_LABEL_LENGTH);
+	int length = strlen(word);
+	int i = 0;
+	if(!label){
+		printf("Memory allocation failed");
+		exit(EXIT_FAILURE);
+	}
+	/* take the label name */
+	while(i < length && word[i] != '.'){
+		label[i] = word[i];
+		i++;
+	}
+	label[i] = '\0';
+
+	/* if theres no dot then its not a struct */
+	if(word[i] != '.')
+		return FALSE;
+	
+	/* if its not a label */
+	if(!is_label_op(label))
+		return FALSE;
+	/* skip the dot */
+	i++;
+	/* struct has two fields only */
+	if(word[i] != '1' && word[i] != '2')
+		return FALSE;
+		
+	return TRUE;
+}
+
+
 
 
 
