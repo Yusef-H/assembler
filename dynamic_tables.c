@@ -21,37 +21,35 @@
 #include "utilities.h"
 
 
-
-
+/***************************************************************/
+				/* Pre Assembler Dynamic Tables  */
+/***************************************************************/
 
 /* Add new macro item to the macros linked list */
 item_ptr add_new_macro(item_ptr *head_item, char* name){
-	item_ptr new_macro;
-	item_ptr first,second;
-	new_macro = (item_ptr)malloc(sizeof(item_ptr));
+	item_ptr new_macro = (item_ptr)malloc(sizeof(item_ptr));
+	item_ptr temp;
 	if(!new_macro){
-		fprintf(stderr,"Memory Allocation failed");
-		exit(0);
+		printf("Memory Allocation failed");
+		exit(EXIT_FAILURE);
 	}
-/*	 Copy the name of the macro */
+	/* Copy the name of the macro */
 	strcpy(new_macro->name, name);
-/*	 Initialize lines linked list head to store lines in. */
+	/* Initialize lines linked list head to store lines in. */
 	new_macro->lines = NULL;
-/*	 Insert macro item to the macros linked list. */
-	second = *head_item;
-	while(second != NULL){
-		first = second;
-		second = second->next;
-	}
-/*	 empty */
-	if(second == *head_item){
+	/* Insert macro item to the macros linked list. */
+	temp = *head_item;
+	if(temp == NULL){
 		*head_item = new_macro;
 		new_macro->next = NULL;
+		return new_macro;
 	}	
-	else{
-		first->next = new_macro;
-		new_macro->next = NULL;
+	while(temp -> next){
+		temp = temp->next;
 	}
+	temp->next = new_macro;
+	new_macro->next = NULL;
+	
 	return new_macro;
 }
 
@@ -62,17 +60,16 @@ void add_macro_line(item_ptr *macro, char* macro_line){
 	line_ptr first,second; /* Pointers used to insert new item. */
 	/* Allocate space for the item's line field. */
 	new_line_item->line = (char*)malloc(sizeof(char)*MAX_LENGTH);
-	if(!new_line_item){
-		fprintf(stderr,"Memory Allocation failed");
-		exit(1);
+	if(!new_line_item || !(new_line_item->line)){
+		printf("Memory Allocation failed");
+		exit(EXIT_FAILURE);
 	}
 	
 	/* Copy the macro lines inside the new line item field. */
 	strcpy((new_line_item->line), macro_line);
-
 	/* Add the new line item to the macro's lines linked list.  */
 	second = (*macro)->lines;
-	while(second != NULL){
+	while(second){
 		first = second;
 		second = second->next;
 	}
@@ -88,11 +85,9 @@ void add_macro_line(item_ptr *macro, char* macro_line){
 	}
 }
 
-/* Checks if a name (string) exists in the macro table */
+/* Checks if a name (string) exists in the macro table as a macro name. */
 item_ptr does_macro_exist(item_ptr macro_head, char* name){
 	while(macro_head != NULL){
-/*		printf("Macro item name: %s",macro_head->name);*/
-		
 		if(!strcmp(macro_head->name, name)){
 			return macro_head;
 		}
@@ -101,6 +96,7 @@ item_ptr does_macro_exist(item_ptr macro_head, char* name){
 	return NULL;
 }
 
+/* This function writes the macro lines list into the fp_am file. */
 void write_macro_lines(item_ptr macro, FILE* fp_am){
 	line_ptr temp;
 	temp = macro->lines;
@@ -127,10 +123,12 @@ void print_macro_table(item_ptr macro_head){
 	}
 }
 
+/***************************************************************/
+				/* First pass Dynamic tables  */
+/***************************************************************/
 
 
-
-/* Add new label to the labels table */
+/* This functions adds a new label to the labels table */
 label_ptr add_label(label_ptr* head, char* name){
 	/* Allocate memory for new label item */
 	label_ptr new_label_item = (label_ptr)malloc(sizeof(label_item));
@@ -138,33 +136,24 @@ label_ptr add_label(label_ptr* head, char* name){
 	int name_len = strlen(name);
 	/* malloc check */
 	if(!new_label_item){
-		fprintf(stderr,"Memory Allocation failed");
-		exit(1);
+		printf("Memory Allocation failed");
+		exit(EXIT_FAILURE);
 	}
-	
-	
-	
-	/* 
-	 Does label name exists check
-	 */
-	if(name_len < MAX_LABEL_LENGTH){
-		new_label_item->label_name = (char*)calloc(sizeof(char),(name_len));
-		strcpy(new_label_item->label_name, name);
-		new_label_item->ent_flag = OFF;
-		new_label_item->ext_flag = OFF;
-	}
-	else{
-		/*error*/
-	}
+	/* initialize label fields. */
+	new_label_item -> addresses = NULL;
+	new_label_item->label_name = (char*)calloc(sizeof(char),(name_len));
+	strcpy(new_label_item->label_name, name);
+	new_label_item->ent_flag = OFF;
+	new_label_item->ext_flag = OFF;
 
+	/* Insert the label at the end of the linked list. */
 	temp = *head;
-	/* if empty */
+	/* If the list is empty. */
 	if(!temp){
 		*head = new_label_item;
 		(*head)->next = NULL;
 		return *head;
 	}
-
 	while(temp->next != NULL){
 		temp = temp->next;
 	}
@@ -173,10 +162,11 @@ label_ptr add_label(label_ptr* head, char* name){
 	return new_label_item;
 }
 
-
+/* This function deletes a label from the label table. */
 void delete_label(label_ptr* head, label_ptr* label){
 	label_ptr temp = *head;
 	label_ptr holder;
+	/* If empty list. */
 	if(!temp){
 		return;
 	}
@@ -189,6 +179,7 @@ void delete_label(label_ptr* head, label_ptr* label){
 		}
 		else{
 			free(temp);
+			*head = NULL;
 			return;
 		}
 	}
@@ -203,10 +194,9 @@ void delete_label(label_ptr* head, label_ptr* label){
 		holder = temp;
 		temp = temp->next;
 	}
-	/* Error */
-	
 }
 
+/* This function updates the labels addresses after the first pass. */
 void update_addresses(label_ptr head, int ic){
 	while(head){
 		/* skip the labels of instructions */
@@ -228,6 +218,7 @@ void update_addresses(label_ptr head, int ic){
 	
 }
 
+/* This function updates the external label addresses after the second pass. */
 void update_ext_addresses(label_ptr head){
 	while(head){
 		if(head->ext_flag){
@@ -241,6 +232,8 @@ void update_ext_addresses(label_ptr head){
 	}
 }
 
+/* These two functions check if we ever got an extern/entry label. */
+
 int ext_exist_check(label_ptr head){
 	while(head){
 		if(head->ext_flag)
@@ -249,7 +242,6 @@ int ext_exist_check(label_ptr head){
 	}
 	return FALSE;
 }
-
 int ent_exist_check(label_ptr head){
 	while(head){
 		if(head->ent_flag)
@@ -259,10 +251,8 @@ int ent_exist_check(label_ptr head){
 	return FALSE;
 }
 
-/* this function sets label address */
-void set_label_address(label_ptr label, int address){
-	(*label).address = address;
-}
+/* This function returns label item that has the given name and null if
+   it doesn't exist in the linked list. */
 label_ptr get_label(label_ptr head, char* name){
 	while(head){
 		if(strcmp(head->label_name, name) == 0){
@@ -273,6 +263,9 @@ label_ptr get_label(label_ptr head, char* name){
 	return NULL;
 }
 
+void set_label_address(label_ptr label, int address){
+	(*label).address = address;
+}
 void turn_label_code_flag(label_ptr label){
 	(*label).code_flag = ON;
 }
@@ -328,8 +321,6 @@ void add_ext_label_address(label_ptr label, int address){
 	address_ptr address_item = (address_ptr)malloc(sizeof(address_item));
 	address_ptr temp;
 	address_item->address = address;
-/*	printf("%s \n",label->label_name);*/
-	
 	temp = label->addresses;
 	if(!temp){	
 		label->addresses = address_item;
@@ -345,15 +336,26 @@ void add_ext_label_address(label_ptr label, int address){
 
 label_ptr free_labels_table(label_ptr* head_addr){
 	label_ptr head = *head_addr;
-	label_ptr to_free = head;
+	label_ptr label_to_free;
 	while(head){
+		label_to_free = head;
+		if(label_to_free->ext_flag){
+			address_ptr address_head = label_to_free->addresses;
+			address_ptr address_to_free;
+			while(address_head){
+				address_to_free = address_head;
+				address_head = address_head->next;
+				free(address_to_free);
+			}
+			address_head = NULL;
+		}
 		head = head->next;
-		free(to_free);
-		to_free = head;
+		free(label_to_free);
 	}
 	head = NULL;
 	return head;
 }
+
 
 
 

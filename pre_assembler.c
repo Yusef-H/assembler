@@ -26,7 +26,6 @@ void pre_assembler_algorithm(FILE* fp_as, FILE* fp_am){
 	char* word;
 	int macro_flag = OFF;
 	
-	/* Can be changed so we cant see implementation of list!!!!!!!! */
 	item_ptr macro_table = NULL;
 	item_ptr current_macro;
 	item_ptr macro;
@@ -35,7 +34,7 @@ void pre_assembler_algorithm(FILE* fp_as, FILE* fp_am){
 		word = (char*)malloc(sizeof(char)*MAX_LENGTH);
 		next_start = get_word(line, word); 
 		
-		/* If macro name exists in table, then write its lines in the file: */
+		/* If macro name exists in table, then write its lines in the file. */
 		if((macro = does_macro_exist(macro_table, word)) ){
 			write_macro_lines(macro, fp_am);
 		}

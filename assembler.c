@@ -1,22 +1,22 @@
-/************************
+/*******************************
 	Assembler File
-************************/
+********************************/
 
 /*
-	This file handles opening the file and running the 
-	first and second pass on it
+	This file handles opening the files and running the 
+	first and second pass on them and
 */
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "assembler.h"
 #include "pre_assembler.h"
-#include "second_pass.h"
+#include "assembler.h"
 #include "utilities.h"
-
 #include "first_pass.h"
+#include "second_pass.h"
+
 /* Global Variable for error types in all the program
-   The error types are in an enum in assembler.h file */
+   The error types are defined in an enum in assembler.h file */
 int error_type;
 int error_occurred = FALSE;
 
@@ -24,6 +24,7 @@ int error_occurred = FALSE;
    in the object file. */
 unsigned int data_segment[SIZE];
 unsigned int code_segment[SIZE];
+/* Instruction and Data counters used in first & second pass. */
 int IC;
 int DC;
 
@@ -52,27 +53,18 @@ const char *registers[NUM_REGISTERS] = {
 
 
 
-
 /* 
-		foreach file in argv[1...argc-1]:
-		
-			***Adds .s to file name
-			***Opens file
-			***Run pre_assembler on the .s file and create .am file.
-			Run first pass on .am file
-			Run second pass on .am file create ob,ent,ext files.
-			Close file
-			
-	*/
-
+	This function handles the main activities in the assembler program:
+	Runs pre assembler then first & second passes on each file we got in
+	the command line.
+ */
 int main(int argc, char *argv[]){
 	FILE *fp_as; /* input file (.as) */
-	FILE *fp_am; /* file after pre assembling. */
+	FILE *fp_am; /* file after pre assembling. (.am) */
 	label_ptr labels_table; /* will hold the labels table returned from first_pass. */
 	char* appended_filename_as;
 	char* appended_filename_am;
 	int i;
-	
 	for(i = 1; i<argc; i++){
 		appended_filename_as = append_filename(argv[i], AS); 
 		appended_filename_am = append_filename(argv[i], AM);
@@ -105,13 +97,18 @@ int main(int argc, char *argv[]){
 		
 		
 		labels_table = free_labels_table(&labels_table);
+		
+		/* Reset global variables after dealing with each file. */
 		reset_globals();
-		/*free(appended_filename);	*/
+		free(appended_filename_as);
+		free(appended_filename_am);	
 	}
 	
 	return 0;
 }
 
+/* This function resets the global variables and arrays used
+   in the program. */
 void reset_globals(){
 	int i;
 	for(i = 0; i< IC; i++){

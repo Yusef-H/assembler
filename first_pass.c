@@ -21,13 +21,13 @@ int line_number;
 	
 	During the first pass:
 	- Add all labels to the symbol table.
-	- encode the directives lines (.data 1,2,3) to the data segment.
+	- encode the directives lines (ex: .data 1,2,3) to the data segment.
 	- encode the first word in instructions lines.
 	- Check for possible errors and output them.
 	
 	
-	This file has some general functions and makes use of 2 other 
-	more specific files which are:
+	This file has some general functions for handling directives and instructions 
+	lines  and makes use of 2 other more specific files which are:
 	
 	- first_pass_directives.c: Has all of the different directives 
 	  specific methods.
@@ -46,16 +46,17 @@ label_ptr first_pass(FILE* fp_am){
 	/* Initializing an empty label table */
 	label_ptr label_table = NULL;
 	
+	/* Initialize counters. */
 	line_number = 1;
 	IC = 0;
 	DC = 0;
 	
-	
+
 	while(fgets(line, MAX_LENGTH, fp_am)){
 		/* ignore if empty line or comment */
-		if(*line == '\n' || *line == ';')
+		if(*line == '\n' || *line == ';' || *line == '\0')
 			continue;
-		/* Send to parse_line function to analyze it. */
+		/* parse each line alone in parse_line function. */
 		parse_line(line, &label_table);
 		
 		/* if there was any error in the line we output it from here. */
@@ -66,21 +67,11 @@ label_ptr first_pass(FILE* fp_am){
 	}
 	free(line);
 	
-	
-	/* if was error stop! */
-	
-	/* 
-	 Update the labels table addresses by adding ic to each one.
-	 */
+	/* Update the labels table addresses by adding ic to each one. */
 	 update_addresses(label_table, IC);
 	 
+	 /* return the label table so we use it in second pass. */
 	 return label_table;
-/*	printf("\n\n");*/
-/*	for(i=0; i<DC; i++){*/
-/*		printf("%u ",data_segment[i]);*/
-/*	}*/
-/*	printf("\n\n");*/
-	
 }
 
 /* 
@@ -92,16 +83,13 @@ label_ptr first_pass(FILE* fp_am){
 void parse_line(char* line, label_ptr* label_table){
 	/* this variable will hold each word in line in order to analyze it. */
 	char* word = (char*)malloc(sizeof(char)*MAX_LENGTH);
-	
 	/* This pointer will point on the next character after we get a word
 	   from the line (so we could continue to get next word). */
 	char* next_word_start = line;
-	
 	/* label pointer to point at the last label added to label table. */
 	label_ptr label_item;
 	char* label_name = (char*)malloc(sizeof(char)*MAX_LENGTH);
-	int label_flag = OFF;
-	
+	int label_flag = OFF; 
 	/* will hold what type of directive/command we got. */
 	int directive,cmd;
 	
