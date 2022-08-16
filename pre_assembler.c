@@ -7,16 +7,16 @@
  from the input file after handling the macros so we can run first pass and 
  second pass on it.
 */
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "pre_assembler.h"
 #include "utilities.h"
 #include "assembler.h"
 #include "dynamic_tables.h"
 
 
 
-/* Pre assembler algorithm (described in project instructions)
+/* Pre assembler algorithm (described in project).
    (The tables used for storing macros and macro lines are implemented
     in dynamic_tables.c file).  */
 void pre_assembler_algorithm(FILE* fp_as, FILE* fp_am){
@@ -67,10 +67,6 @@ void pre_assembler_algorithm(FILE* fp_as, FILE* fp_am){
 		free(word);
 	}
 	free(line);
-	
-	
-	/*print_macro_table(macro_table);*/
-	
 }
 
 

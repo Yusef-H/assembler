@@ -9,7 +9,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "pre_assembler.h"
 #include "assembler.h"
 #include "utilities.h"
 #include "first_pass.h"

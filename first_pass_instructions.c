@@ -18,6 +18,106 @@ extern unsigned int code_segment[SIZE];
 extern int IC;
 
 
+/* This method gets an operand and returns the number of the addressing
+   method. */
+int address_method_detector(char* op){	
+	
+	/* instant addressing - example: #7, #-5... */
+	if(*op == '#'){
+		op++;
+		/* number check */
+		if(*op == '+' || *op == '-'){
+			op++;
+			if(!(isdigit(*op))){
+				return NONE;
+			}
+		}
+		/* # appeard without numbers */
+		if(!(isdigit(*op))){
+				op++;
+				return NONE;
+		}
+		while(*op != '\n' && *op != EOF && *op != '\0'){
+			if(!(isdigit(*op))){
+				op++;
+				return NONE;
+			}
+			op++;
+		}
+		return INSTANT_ADDRESSING;
+	}
+	
+	/* direct addressing */	
+	else if(is_label_op(op)){
+		return DIRECT_ADDRESSING;
+	}
+	
+	/* struct addressing */
+	else if(is_struct_op(op)){
+		return STRUCT_ADDRESSING;	
+	}
+
+	/* register addressing */
+	else if(is_register(op)){
+		return REGISTER_ADDRESSING;
+	}
+	return NONE;
+}
+
+/* This function returns the number of extra words the addressing method
+   requires. */
+int method_extra_words(int method){
+	if(method == STRUCT_ADDRESSING)
+		return 2;
+	/* direct or instant or register addressing */	
+	return 1;
+}
+
+unsigned int create_first_word(int command,int got_first_op, int got_second_op, int first_address_method, int second_address_method){
+	unsigned int first_word = EMPTY_WORD;
+	/* first we insert the command */
+	first_word = command;
+	
+	/* Check if we have one operand */
+	if(got_first_op){
+		/* create place for operand method bits. */
+		first_word = first_word << OPERAND_BITS;
+		
+		/* If we have second operand */
+		if(got_second_op){
+			/* add first operand addressing method: */
+			first_word = first_word | first_address_method;
+			
+			/* create new place for the second operand address method */
+			first_word = first_word << OPERAND_BITS;
+			/* add second method */
+			first_word = first_word | second_address_method;
+			
+		}
+		/* else the one operand is destination operand
+		   so the 4th and 5th bits are zero */
+		else{
+			/* Skip the bits that were for source operand */
+			first_word = first_word << OPERAND_BITS;
+			/* add the addressing method */
+			first_word = first_word | first_address_method;
+		}
+	}
+	/* else its a command with no operands */
+	else{
+		/* skip both operands bits */
+		first_word = first_word << 2*OPERAND_BITS;
+	
+	}
+	/* add ARE bits which are absolute always in first words. */
+	first_word = first_word << ARE_BITS;
+	return first_word;							   
+}
+
+/* encode the given word in code segment array. */
+void encode_in_code_segment(unsigned int word){
+	code_segment[IC++] = word;
+}
 
 /* This function checks if the number of operands received are valid for 
    the command. */
@@ -79,7 +179,6 @@ int validate_addressing_methods(int command,int first_address_method,
 		       (second_address_method == DIRECT_ADDRESSING ||
 		       second_address_method == STRUCT_ADDRESSING ||
 		       second_address_method == REGISTER_ADDRESSING);
-		
 		       
 		/* commands that accept: 
 		   Src: doesn't have source operand.
@@ -107,112 +206,6 @@ int validate_addressing_methods(int command,int first_address_method,
 		       second_address_method == REGISTER_ADDRESSING);
 	}
 	return FALSE;
-}
-
-/* This method gets an operand and returns the number of the addressing
-   method. */
-int address_method_detector(char* op){	
-	
-	/* instant addressing - example: #7, #-5... */
-	if(*op == '#'){
-		op++;
-		/* number check */
-		if(*op == '+' || *op == '-'){
-			op++;
-			if(!(isdigit(*op))){
-				error_type = INVALID_OPERAND;
-				throw_error();
-				return NONE;
-			}
-		}
-		while(*op != '\n' && *op != EOF && *op != '\0'){
-			if(!(isdigit(*op))){
-				op++;
-				error_type = INVALID_OPERAND;
-				throw_error();
-				return NONE;
-			}
-			op++;
-		}
-		return INSTANT_ADDRESSING;
-	}
-	
-	/* direct addressing */	
-	else if(is_label_op(op)){
-		return DIRECT_ADDRESSING;
-	}
-	
-	/* struct addressing */
-	else if(is_struct_op(op)){
-		return STRUCT_ADDRESSING;	
-	}
-
-	/* register addressing */
-	else if(is_register(op)){
-		return REGISTER_ADDRESSING;
-	}
-	
-	return NONE;
-}
-
-/* This function returns the number of extra words the addressing method
-   requires. */
-int method_extra_words(int method){
-	if(method == STRUCT_ADDRESSING)
-		return 2;
-	/* direct or instant or register addressing */	
-	return 1;
-}
-
-unsigned int create_first_word(int command,int got_first_op, int got_second_op, int first_address_method, int second_address_method){
-	unsigned int first_word = 0;
-	/* first we insert the command */
-	first_word = command;
-	
-	
-	/* Check if we have one operand */
-	if(got_first_op){
-		/* create place for operand method bits. */
-		first_word = first_word << OPERAND_BITS;
-		
-		/* If we have second operand */
-		if(got_second_op){
-			/* add first operand addressing method: */
-			first_word = first_word | first_address_method;
-			
-			/* create new place for the second operand address method */
-			first_word = first_word << OPERAND_BITS;
-			/* add second method */
-			first_word = first_word | second_address_method;
-			
-		}
-		/* else the one operand is destination operand
-		   so the 4th and 5th bits are zero */
-		else{
-			/* Skip the bits that were for source operand */
-			first_word = first_word << OPERAND_BITS;
-			/* add the addressing method */
-			first_word = first_word | first_address_method;
-		}
-	}
-	/* else its a command with no operands */
-	else{
-		/* skip both operands bits */
-		first_word = first_word << 2*OPERAND_BITS;
-	
-	}
-	
-	/* add ARE bits which are absolute always in first words */
-	first_word = first_word << ARE_BITS;
-	
-	/* ADD A R E method */
-	return first_word;
-							   
-}
-
-
-void encode_in_code_segment(unsigned int word){
-	code_segment[IC++] = word;
 }
 
 

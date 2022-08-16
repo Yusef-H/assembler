@@ -17,7 +17,6 @@
 #include <string.h>
 #include "assembler.h"
 #include "dynamic_tables.h"
-#include "pre_assembler.h"
 #include "utilities.h"
 
 

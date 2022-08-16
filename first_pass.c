@@ -20,7 +20,7 @@ int line_number;
 	This file handles the first pass on the file
 	
 	During the first pass:
-	- Add all labels to the symbol table.
+	- Add all labels to the labels table.
 	- encode the directives lines (ex: .data 1,2,3) to the data segment.
 	- encode the first word in instructions lines.
 	- Check for possible errors and output them.
@@ -43,6 +43,7 @@ int line_number;
 */
 label_ptr first_pass(FILE* fp_am){
 	char* line = (char*)malloc(sizeof(char)*MAX_LENGTH);
+	char* line_position = line; /* pointer at next char in line */
 	/* Initializing an empty label table */
 	label_ptr label_table = NULL;
 	
@@ -53,10 +54,13 @@ label_ptr first_pass(FILE* fp_am){
 	
 	while(fgets(line, MAX_LENGTH, fp_am)){
 		/* ignore if empty line or comment */
-		if(*line == '\n' || *line == ';' || *line == '\0')
+		line_position = skip_whitespaces(line);
+		if(*line_position == '\n' || *line_position == ';' || *line_position == '\0'){
+			line_number++;
 			continue;
+		}
 		/* parse each line alone in parse_line function. */
-		parse_line(line, &label_table);
+		parse_line(line_position, &label_table);
 		
 		/* if there was any error in the line we output it from here. */
 		if(error_type != NO_ERROR){
@@ -120,6 +124,12 @@ void parse_line(char* line, label_ptr* label_table){
 	   a start of directive line.  */
 	
 	if((directive = is_directive(word))){
+		/* check for illegal comma after directive name */
+		char* check_for_comma = skip_whitespaces(next_word_start);
+		if(*check_for_comma == ','){
+			error_type = ILLEGAL_COMMA;
+			return;
+		}
 		if(label_flag == ON){
 			/* label that appears before extern or entern directive
 			   has no purpose so we delete it. */
@@ -134,6 +144,12 @@ void parse_line(char* line, label_ptr* label_table){
 		directive_handler(directive, next_word_start, label_table);
 	}
 	else if((cmd = is_command(word)) != NOT_CMD){
+		/* check for illegal comma after command name */
+		char* check_for_comma = skip_whitespaces(next_word_start);
+		if(*check_for_comma == ','){
+			error_type = ILLEGAL_COMMA;
+			return;
+		}
 		if(label_flag == ON){
 			/* flag that the label is in code segment */
 			turn_label_code_flag(label_item);
@@ -174,7 +190,6 @@ void directive_handler(int directive, char* params, label_ptr* label_table){
 
 /* This function handles command according to its type. */
 void command_handler(int command, char* params){
-	/* check MAX_LENGTH (maybe change to something smaller). */
 	char first_operand[OPERAND_LENGTH];
 	char second_operand[OPERAND_LENGTH];
 	/* flags for first and second operands that turn on when we have them
@@ -187,7 +202,6 @@ void command_handler(int command, char* params){
 	/* pointer to the next word start in parameters string */
 	char* next_word_start;
 	
-	
 	/* Get first operand */
 	next_word_start = get_word(params, first_operand);
 	/* If first operand exists: */
@@ -195,7 +209,7 @@ void command_handler(int command, char* params){
 		got_first_op = ON;
 		/* get addressing method of first operand */
 		first_address_method = address_method_detector(first_operand);
-		/* Update IC */
+		/* Update L */
 		if(first_address_method != NONE){
 			L = L + method_extra_words(first_address_method);
 		}
@@ -242,18 +256,12 @@ void command_handler(int command, char* params){
 			}
 		}
 	}
-		
-		
 			
-	/* validate number of parameters and addressing method types for 
-	   the command type. */
+	/* validate number of parameters and addressing method types for the command type. */
 	if(validate_num_operands(command, got_first_op, got_second_op)){ 
 		if(validate_addressing_methods(command, first_address_method, second_address_method)){	
-			/* Create the first instruction word that goes into the 
-			   data segment. */
-			encode_in_code_segment(create_first_word(command, got_first_op,
-									got_second_op, first_address_method,
-								    second_address_method));
+			/* Create the first instruction word that goes into the data segment. (for instruction lines). */
+			encode_in_code_segment(create_first_word(command, got_first_op, got_second_op, first_address_method, second_address_method));
 			IC = IC + L;
 		}
 		else{

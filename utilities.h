@@ -1,28 +1,25 @@
+/***********************************************
+	Utilities header file
+***********************************************/
 
-/* Throws error according to error type. */
+/* handles all errors output */
 void throw_error();
 
-/* Appends file names with the suffixes according to the type (.as,.am,.ob,..).  */
-char* append_filename(char* filename, int append_type);
+/* Converts a 10 bit word to 2 digits number in base32. */
+char* convert_to_base32(unsigned int);
 
-/* gets the next word in line */
-char* get_word(char*, char*);
+/* This function appends filenames (.as, .am, .ent, .ext) */
+char* append_filename(char*, int);
 
-void empty_word(char*);
-
+/* Very specific functions that are used to check strings and analyze them
+   or parse line helpers. */
 int is_reserved_word(char*);
-
-int is_label(char* word, char* label_name);
-int is_label_op(char* word);
-int is_struct_op(char* word);
-
-
+int is_label(char*, char*);
+int is_label_op(char*);
+int is_struct_op(char*);
+int is_end_of_line(char);
+int is_register(char*);
+char* get_word(char*, char*);
 char* skip_whitespaces(char* );
 
-char* skip_line(char*);
 
-int is_end_of_line(char c);
-
-int is_register(char*);
-
-char* convert_to_base32(unsigned int word);

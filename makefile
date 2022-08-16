@@ -6,13 +6,13 @@ pre_assembler.o: pre_assembler.c utilities.h assembler.h
 	gcc -c -g -Wall -pedantic -ansi pre_assembler.c
 utilities.o: utilities.c utilities.h assembler.h
 	gcc -c -g -Wall -pedantic -ansi utilities.c
-assembler.o: assembler.c assembler.h pre_assembler.h utilities.h
+assembler.o: assembler.c assembler.h utilities.h
 	gcc -c -g -Wall -pedantic -ansi assembler.c
-first_pass.o: first_pass.c assembler.h pre_assembler.h utilities.h
+first_pass.o: first_pass.c assembler.h utilities.h
 	gcc -c -g -Wall -pedantic -ansi first_pass.c
 first_pass_directives.o: first_pass_directives.c first_pass.h assembler.h utilities.h
 	gcc -c -g -Wall -pedantic -ansi first_pass_directives.c
 first_pass_instructions.o: first_pass_instructions.c first_pass.h assembler.h utilities.h
 	gcc -c -g -Wall -pedantic -ansi first_pass_instructions.c
-second_pass.o: second_pass.c second_pass.h assembler.h pre_assembler.h utilities.h
+second_pass.o: second_pass.c second_pass.h assembler.h utilities.h
 	gcc -c -g -Wall -pedantic -ansi second_pass.c
