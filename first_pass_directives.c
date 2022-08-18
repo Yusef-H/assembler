@@ -46,7 +46,7 @@ void entry_directive_handler(char* params){
    into it as an extern label with zero address. 
 */
 void extern_directive_handler(char* params, label_ptr* label_table){
-	label_ptr extern_label_ptr ;
+	label_ptr extern_label_ptr;
 	char label_name[MAX_LABEL_LENGTH];
 	/* Syntax check is the same as entry directive */
 	entry_directive_handler(params);

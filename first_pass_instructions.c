@@ -9,10 +9,6 @@
 #include "first_pass.h"
 #include "assembler.h"
 
-/*
-	This file has methods that are used in parsing/validating instruction lines 
-*/
-
 extern int error_type;
 extern unsigned int code_segment[SIZE];
 extern int IC;
@@ -73,6 +69,9 @@ int method_extra_words(int method){
 	return 1;
 }
 
+/*
+	This function creates the first word in instructions line.
+*/
 unsigned int create_first_word(int command,int got_first_op, int got_second_op, int first_address_method, int second_address_method){
 	unsigned int first_word = EMPTY_WORD;
 	/* first we insert the command */

@@ -2,22 +2,6 @@
 	Dynamic tables header file
 *********************************/
 
-
-
-/*
-	This file has all the implementations of the dynamic tables used 
-	in the project, which are:
-	
-	1- Macros linked list: 
-		each macro holds an inner linked list 
-		for the macro's lines. (used by the pre assembler).
-	    
-	2- Symbols linked list:
-		Each symbol holds the symbols name and it's address and another
-		type variable which holds two values (CODE/DATA).
-		
-*/
-
 #ifndef DYNAMIC_TABLES_H
 
 #define DYNAMIC_TABLES_H

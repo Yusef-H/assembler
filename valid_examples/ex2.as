@@ -6,7 +6,7 @@ S2:		.struct -1   ,    "12345"
 XYZ:	jmp W
 		macro m1
 		inc K
-; This is comment!!!!!
+; Its a comment here
 		mov S1.2,      r3
 		endmacro
 		prn         #-50

@@ -23,8 +23,10 @@ extern const char *commands[NUM_COMMANDS];
 extern const char *registers[NUM_REGISTERS];
 extern const char base_32[32];
 
-/* This function outputs an error according to the error_type global variable
-   then resets it to catch more errors. */
+/* 
+	This function outputs an error according to the error_type global variable
+    then resets it to catch more errors throughout the program.
+*/
 void throw_error(){
 	switch(error_type){
 		case RESERVED_WORD_LABEL_NAME:
@@ -61,7 +63,7 @@ void throw_error(){
 			printf("\nMissing operand in line %d.\n",line_number);
 			break;
 		case EXTRA_TEXT_AFTER_OPERAND:
-			printf("\nExtra text after second operand in line %d.\n",line_number);
+			printf("\nExtra text after operand in line %d.\n",line_number);
 			break;
 		case MISSING_LABEL:
 			printf("\nMissing label name in line %d.\n",line_number);
@@ -86,6 +88,9 @@ void throw_error(){
 			break;
 		case OPEN_FILE:
 			printf("\nCannot open the file.\n");
+			break;
+		case LONG_LINE:
+			printf("\nLine %d has exceeded the maximum supported line length.\n",line_number);
 			break;
 			
 	

@@ -26,8 +26,9 @@ int line_number;
 	- Check for possible errors and output them.
 	
 	
-	This file has some general functions for handling directives and instructions 
-	lines  and makes use of 2 other more specific files which are:
+	This file has some general functions for handling directives and 
+	instructions lines  and makes use of 2 other more specific files
+	which are:
 	
 	- first_pass_directives.c: Has all of the different directives 
 	  specific methods.
@@ -56,6 +57,15 @@ label_ptr first_pass(FILE* fp_am){
 		/* ignore if empty line or comment */
 		line_position = skip_whitespaces(line);
 		if(*line_position == '\n' || *line_position == ';' || *line_position == '\0'){
+			line_number++;
+			continue;
+		}
+		/* Check for lines longer than max length by checking if the last
+		   character gotten by the fgets is a new space. If its not then
+		   there's extra characters that exceed the max supported length. */
+		if(line[strlen(line) - 1] != '\n'){
+			error_type = LONG_LINE;
+			throw_error();
 			line_number++;
 			continue;
 		}

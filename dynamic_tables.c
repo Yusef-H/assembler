@@ -4,8 +4,13 @@
 
 /*
  	This file contains the implementation of the two dynamic tables:
- 	1- Symbols table that is used in the first and second pass.
- 	
+ 	1- Labels table that is used in the first and second pass.
+ 		- This is implemented as a linked list where each node holds 
+ 		  extra information and tags that tell us information about the
+ 		  label like is it extern,entry, in code segment or data segment..
+ 		  And each extern label holds an addresses inner linked list which
+ 		  holds the addresses the extern label was used in so we can write
+ 		  them in .ext file after second pass.
  	
  	2- Macros table that is used during preprocessing.
  	   - This table is implemented using a linked list for every
@@ -231,6 +236,63 @@ void update_ext_addresses(label_ptr head){
 	}
 }
 
+/* 
+	This function adds an address to an extern label item inner addresses
+	linked list.
+*/
+void add_ext_label_address(label_ptr label, int address){
+	/* Allocate memory for new address item. */
+	address_ptr address_item = (address_ptr)malloc(sizeof(address_item));
+	address_ptr temp; /* Will be used to run on addresses linked list. */
+	if(!address_item){
+		printf("Memory allocation failed");
+		exit(EXIT_FAILURE);
+	}
+	
+	address_item->address = address; 
+	temp = label->addresses;
+	
+	/* Add new address item at the end of the list. */
+	if(!temp){	
+		label->addresses = address_item;
+		address_item->next = NULL;
+		return;
+	}
+	while(temp->next){
+		temp = temp->next;
+	}
+	temp->next = address_item;
+	address_item->next = NULL;
+}
+
+/*
+	This function handles freeing the memory allocated for the labels 
+	linked list items, and also frees the inner addresses lists for 
+	extern labels.
+*/
+label_ptr free_labels_table(label_ptr* head_addr){
+	label_ptr head = *head_addr;
+	label_ptr label_to_free;
+	while(head){
+		label_to_free = head;
+		/* If it's extern label, free it's inner addresses list. */
+		if(label_to_free->ext_flag){
+			address_ptr address_head = label_to_free->addresses;
+			address_ptr address_to_free;
+			while(address_head){
+				address_to_free = address_head;
+				address_head = address_head->next;
+				free(address_to_free);
+			}
+			address_head = NULL;
+		}
+		head = head->next;
+		free(label_to_free);
+	}
+	head = NULL;
+	return head;
+}
+
 /* These two functions check if we ever got an extern/entry label. */
 
 int ext_exist_check(label_ptr head){
@@ -262,13 +324,14 @@ label_ptr get_label(label_ptr head, char* name){
 	return NULL;
 }
 
+/* Functions used to abstract accessing labels table: */
+
 void set_label_address(label_ptr label, int address){
 	(*label).address = address;
 }
 void turn_label_code_flag(label_ptr label){
 	(*label).code_flag = ON;
 }
-
 void turn_label_ext_flag(label_ptr label){
 	(*label).ext_flag = ON;
 }
@@ -291,6 +354,9 @@ int turn_label_ent_flag(label_ptr head, char* label_name){
 	return FALSE;
 }
 
+/*
+	This function checks if a name exists as a label name in the table.
+*/
 int label_exist_check(label_ptr head,char* name){
 	while(head){
 		if(strcmp(head->label_name,name) == 0)
@@ -299,6 +365,9 @@ int label_exist_check(label_ptr head,char* name){
 	}
 	return FALSE;
 }
+/*
+	This function prints the label table with some of its components.
+*/
 void print_labels(label_ptr head){
 	while(head){
 		printf("%s    add:%d, code:%d, ent:%d, ext:%d",head->label_name, head->address, head->code_flag, head->ent_flag,head->ext_flag);
@@ -316,44 +385,7 @@ void print_labels(label_ptr head){
 	printf(";;");
 }
 
-void add_ext_label_address(label_ptr label, int address){
-	address_ptr address_item = (address_ptr)malloc(sizeof(address_item));
-	address_ptr temp;
-	address_item->address = address;
-	temp = label->addresses;
-	if(!temp){	
-		label->addresses = address_item;
-		address_item->next = NULL;
-		return;
-	}
-	while(temp->next){
-		temp = temp->next;
-	}
-	temp->next = address_item;
-	address_item->next = NULL;
-}
 
-label_ptr free_labels_table(label_ptr* head_addr){
-	label_ptr head = *head_addr;
-	label_ptr label_to_free;
-	while(head){
-		label_to_free = head;
-		if(label_to_free->ext_flag){
-			address_ptr address_head = label_to_free->addresses;
-			address_ptr address_to_free;
-			while(address_head){
-				address_to_free = address_head;
-				address_head = address_head->next;
-				free(address_to_free);
-			}
-			address_head = NULL;
-		}
-		head = head->next;
-		free(label_to_free);
-	}
-	head = NULL;
-	return head;
-}
 
 
 

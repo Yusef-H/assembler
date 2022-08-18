@@ -31,13 +31,19 @@ void second_pass(FILE* fp_am, label_ptr labels_table, char* file_name){
 	int ext_exist = OFF,ent_exist = OFF;
 	char* line = (char*)malloc(sizeof(char)*MAX_LENGTH);
 	char* line_position = line;
+	if(!line){
+		printf("Memory allocation failed");
+		exit(EXIT_FAILURE);
+	}
 	line_number = 1;
 	IC = 0;
 	while(fgets(line, MAX_LENGTH, fp_am)){
 		line_position = skip_whitespaces(line);
 		/* ignore if empty line or comment */
-		if(*line_position == '\n' || *line_position == ';' || *line_position == '\0')
-			continue;
+		if(*line_position == '\n' || *line_position == ';' || *line_position == '\0'){
+			line_number++;
+			continue;	
+		}
 			
 		/* parse the line according to second pass algorithm. */
 		second_parse_line(line, labels_table);
@@ -53,7 +59,8 @@ void second_pass(FILE* fp_am, label_ptr labels_table, char* file_name){
 	/* Update extern labels addresses. (to start at 100) */
 	update_ext_addresses(labels_table);
 	
-	print_labels(labels_table);
+	/* used to print labels table and helped in debugging. */
+	/* print_labels(labels_table);*/
 	
 	/* Check if there exists any extern or entry labels to decide whether
 	   to create .ent and .ent files. */
@@ -67,7 +74,7 @@ void second_pass(FILE* fp_am, label_ptr labels_table, char* file_name){
 }
 
 /*
-	
+	Parse a line in second pass using the given algorithm.
 */
 void second_parse_line(char* line, label_ptr label_table){
 	int directive, command; /* will hold cmd,directive types. */
@@ -111,35 +118,48 @@ void second_parse_line(char* line, label_ptr label_table){
 	
 }
 
+/* 
+	This function handles creating the three extra output files .ob .ent .ext
+	and calls the appropriate functions for that goal.
+*/
 void output_files_handler(char* file_name,label_ptr labels_table, int ext, int ent){
 	create_object_file(file_name);
+	/* We create .ext file only if there was atleast 1 extern label. */
 	if(ext){
 		create_ext_file(file_name, labels_table);	
 	}
+	/* We create .ent file only if there was atleast 1 entry label. */
 	if(ent){
 		create_ent_file(file_name,labels_table);
 	}
 }
 
+/*
+	This function creates the .ob file.
+*/
 void create_object_file(char* file_name){
 	FILE* obj_file;
 	int i = 0;
 	unsigned int address = MEMORY_START;
 	char* temp1 = convert_to_base32(IC);
 	char* temp2 = convert_to_base32(DC);
+	/* We remove leading zeroes in IC and DC base 32 numbers because
+	   thats how it appeard in the maman output. */
 	if(temp1[0] == '!'){
 		temp1[0] = ' ';
 	}
 	if(temp2[0] == '!'){
 		temp2[0] = ' ';
 	}
+	/* open the new file */
 	file_name = append_filename(file_name,OB);
 	obj_file = fopen(file_name, "w");
 	/* encoding IC and DC at start of object file */
 	fprintf(obj_file, "%s\t\t%s\n\n",temp1,temp2);
 	free(temp1);
 	free(temp2);
-	/* create code segment */
+	
+	/* Create code segment. */
 	while(i < IC){
 		temp1 = convert_to_base32(address++);
 		temp2 = convert_to_base32(code_segment[i++]);
@@ -150,6 +170,7 @@ void create_object_file(char* file_name){
 	
 	i = 0;
 	
+	/* Create data segment. */
 	while(i < DC){
 		temp1 = convert_to_base32(address++);
 		temp2 = convert_to_base32(data_segment[i++]);
@@ -160,14 +181,23 @@ void create_object_file(char* file_name){
 	fclose(obj_file);
 }
 
+/*
+	This function creates the .ext file which has all the external labels
+	addresses that they appeard in.
+*/
 void create_ext_file(char* file_name,label_ptr labels_table){
 	FILE* ext_file;
+	/* Temporary variable to run on labels table. */
 	label_ptr temp = labels_table;
+	/* Open the .ext file */
 	file_name = append_filename(file_name, EXT);
 	ext_file = fopen(file_name, "w");
+	/* Create the .ext file by writing the extern labels appearances with their
+	   addresses in base 32. */
 	while(temp){
 		if(temp->ext_flag){
 			address_ptr addresses = temp->addresses;
+			/* Write all of the label addresses. */
 			while(addresses){
 				char* address = convert_to_base32(addresses->address);
 				fprintf(ext_file,"%s\t%s\n",temp->label_name, address);
@@ -181,12 +211,20 @@ void create_ext_file(char* file_name,label_ptr labels_table){
 	fclose(ext_file);
 }
 
+/*
+	This function creates the .ent file which has the addresses of the entry
+	which is where they were defined.
+*/
 void create_ent_file(char* file_name, label_ptr labels_table){
 	FILE* ent_file;
+	/* Temporary variable that will go over the labels table. */
 	label_ptr temp = labels_table;
+	/* Open the file */
 	file_name = append_filename(file_name, ENT);
 	ent_file = fopen(file_name, "w");
 	while(temp){
+		/* Check for entry tagged labels and write them with their addresses
+		   in base 32. */
 		if(temp->ent_flag){
 			char* address = convert_to_base32(temp->address);
 			fprintf(ent_file,"%s\t%s\n",temp->label_name, address);

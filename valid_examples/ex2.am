@@ -8,7 +8,7 @@ XYZ:	jmp W
 		
 		sub r1          ,r4
 		inc K
-; This is comment!!!!!
+; Its a comment here
 		mov S1.2,      r3
 		bne L3
 END:	hlt
